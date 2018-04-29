@@ -12,7 +12,7 @@ class VerticesRenderNode extends ObjectNode {
 
         let colorLocation = gl.getAttribLocation(context.shader, 'a_color');
         gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
-        gl.vertexAttribPointer(colorLocation, 4, gl.FLOAT, false, 0, 0);
+        gl.vertexAttribPointer(colorLocation, 3, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(colorLocation);
 
         gl.uniform1f(gl.getUniformLocation(context.shader, 'u_alpha'), this.alpha);

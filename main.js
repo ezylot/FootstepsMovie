@@ -33,7 +33,7 @@ class Movie {
         this.rocketTransformationNode = new TransformationNode(rocketTransformationMatrix);
         this.rootNode.append(this.rocketTransformationNode);
 
-        let rocketColorNode = new ShaderNode(createProgram(this.gl, resources.rocketColorVS, resources.defaultFS));
+        let rocketColorNode = new ShaderNode(createProgram(this.gl, resources.defaultVS, resources.defaultFS));
         this.rocketTransformationNode.append(rocketColorNode);
 
         this.rocketNode = createRocketNode(this.gl);
@@ -88,7 +88,6 @@ class Movie {
 loadResources({
     defaultVS: 'shaders/simple.vs.glsl',
     defaultFS: 'shaders/simple.fs.glsl',
-    rocketColorVS: 'shaders/rocketColor.vs.glsl',
 }).then(resources => {
     let movie = new Movie();
     movie.init(resources);
@@ -97,4 +96,12 @@ loadResources({
 
 function convertDegreeToRadians(degree) {
     return degree * Math.PI / 180
+}
+
+function repeat(array, n) {
+    let repeated = [];
+    for(let i = 0; i < n; i++) {
+        repeated = repeated.concat(array);
+    }
+    return repeated;
 }
