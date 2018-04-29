@@ -52,9 +52,9 @@ function Movie() {
 }
 
 loadResources({
-    defaultVS: 'shader/simple.vs.glsl',
-    defaultFS: 'shader/simple.fs.glsl',
-    yellow_colorVS: 'shader/yellowColor.vs.glsl'
+    defaultVS: 'shaders/simple.vs.glsl',
+    defaultFS: 'shaders/simple.fs.glsl',
+    yellow_colorVS: 'shaders/yellowColor.vs.glsl'
 }).then(resources => {
     let movie = new Movie();
     movie.init(resources);
