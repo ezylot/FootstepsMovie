@@ -54,6 +54,14 @@ class Movie {
 
         this.gl.useProgram(this.shaderProgram);
 
+
+        if(timeInMilliseconds > 2000) {
+            let rocketTransMatrix = this.rocketTransformationNode.getMatrix();
+            let thrust = (timeInMilliseconds / 1000000) * Math.exp((timeInMilliseconds / 5000));
+            rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.translate(0, thrust, 0));
+            this.rocketTransformationNode.setMatrix(rocketTransMatrix);
+        }
+
         this.rootNode.render(this.createSceneGraphContext(this.gl, this.shaderProgram));
 
         window.requestAnimationFrame((timestamp) => this.render(timestamp));
