@@ -8,6 +8,8 @@ class CubeRenderNode extends ObjectNode {
 
     render(context) {
         let modelViewMatrix = mat4.multiply(mat4.create(), context.viewMatrix, context.sceneMatrix);
+        let gl = context.gl;
+
         gl.uniformMatrix4fv(gl.getUniformLocation(context.shader, 'u_modelView'), false, modelViewMatrix);
 
         let positionLocation = gl.getAttribLocation(context.shader, 'a_position');
