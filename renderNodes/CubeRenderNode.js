@@ -1,6 +1,6 @@
 class CubeRenderNode extends ObjectNode {
 
-    constructor(verticesBuffer, colorBuffer, alpha, verticesIndexBuffer, indexLength) {
+    constructor(verticesBuffer, verticesIndexBuffer, indexLength, colorBuffer, alpha) {
         super(verticesBuffer, colorBuffer, alpha);
         this.verticesIndexBuffer = verticesIndexBuffer;
         this.indexLength = indexLength;
