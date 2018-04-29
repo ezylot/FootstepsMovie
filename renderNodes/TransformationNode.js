@@ -14,4 +14,8 @@ class TransformationNode extends RootNode {
     setMatrix(matrix) {
         this.matrix = matrix;
     }
+
+    getMatrix(matrix) {
+        return this.matrix;
+    }
 }

@@ -1,4 +1,4 @@
-class ShaderSceneGraphNode extends RootNode {
+class ShaderNode extends RootNode {
     constructor(shader) {
         super();
         this.shader = shader;
