@@ -16,7 +16,6 @@ class Movie {
 
         // Set up the green floor
         let floorTransformationMatrix = mat4.create();
-        floorTransformationMatrix = mat4.multiply(mat4.create(), floorTransformationMatrix, glm.translate(0.0, -1, 0));
         floorTransformationMatrix = mat4.multiply(mat4.create(), floorTransformationMatrix, glm.scale(2, 0, 2));
         floorTransformationMatrix = mat4.multiply(mat4.create(), floorTransformationMatrix, glm.rotateX(90));
 
@@ -68,11 +67,11 @@ class Movie {
     };
 
     createSceneGraphContext(gl, shader) {
-        let projectionMatrix = mat4.perspective(mat4.create(), this.fieldOfViewInRadians, this.canvas.width / this.canvas.height, 0.01, 10);
+        let projectionMatrix = mat4.perspective(mat4.create(), this.fieldOfViewInRadians, this.canvas.width / this.canvas.height, 0.01, 20);
         gl.uniformMatrix4fv(gl.getUniformLocation(shader, 'u_projection'), false, projectionMatrix);
 
-        let eye = vec3.fromValues(0, 0, 5);
-        let center = vec3.fromValues(0, 0, 0);
+        let eye = vec3.fromValues(1, 3, 8);
+        let center = vec3.fromValues(0, 2, 0);
         let up = vec3.fromValues(0, 1, 0);
         let viewMatrix = mat4.lookAt(mat4.create(), eye, center, up);
 

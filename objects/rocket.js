@@ -11,7 +11,7 @@ function createRocketNode(gl) {
 
     // Tip of rocket
     let tipTransformationMatrix = mat4.create();
-    tipTransformationMatrix = mat4.multiply(mat4.create(), tipTransformationMatrix, glm.translate(0, 1, 0));
+    tipTransformationMatrix = mat4.multiply(mat4.create(), tipTransformationMatrix, glm.translate(0, 2, 0));
     let tipTransformationNode = new TransformationNode(tipTransformationMatrix);
     rocketNode.append(tipTransformationNode);
     tipTransformationNode.append(createTip(gl));
