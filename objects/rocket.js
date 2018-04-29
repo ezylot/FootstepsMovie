@@ -21,11 +21,11 @@ function createRocketNode(gl) {
 
 function createTip(gl) {
     let pyramidVertices =  new Float32Array([
-        0,0,0,   // 0 - DLB
-        0,0,1,    // 1 - DLF
-        1,0,1,     // 2 - DRF
-        1,0,0,    // 3 - DRF
-        0.5,1,0.5,      // 4 tip
+        -0.5,0,-0.5,   // 0 - DLB
+        -0.5,0,0.5,    // 1 - DLF
+        0.5,0,0.5,     // 2 - DRF
+        0.5,0,-0.5,    // 3 - DRF
+        0,1,0,      // 4 tip
     ]);
 
     let pyramidIndices =  new Float32Array([
@@ -56,15 +56,15 @@ function createTip(gl) {
 
 function createBody(gl) {
     let cubeVertices = new Float32Array([
-        0,0,0,   // 0 - DLB
-        0,0,1,    // 1 - DLF
-        1,0,1,     // 2 - DRF
-        1,0,0,    // 3 - DRF
+        -0.5,0,-0.5,   // 0 - DLB
+        -0.5,0,0.5,    // 1 - DLF
+        0.5,0,0.5,     // 2 - DRF
+        0.5,0,-0.5,    // 3 - DRF
 
-        0,1,0,   // 4 - ULB
-        0,1,1,    // 5 - ULF
-        1,1,1,     // 6 - URF
-        1,1,0,    // 7 - URF
+        -0.5,1,-0.5,   // 4 - ULB
+        -0.5,1,0.5,     // 5 - ULF
+        0.5,1,0.5,       // 6 - URF
+        0.5,1,-0.5,     // 7 - URF
     ]);
 
     let cubeIndices =  new Float32Array([

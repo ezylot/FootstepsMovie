@@ -1,10 +1,11 @@
+'use strict';
+
 class Movie {
     constructor() {
         this.canvas = document.querySelector('#movieCanvas');
         this.gl = this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl');
         this.shaderProgram = null;
         this.rootNode = new RootNode();
-        this.animatedAngle = 0;
         this.fieldOfViewInRadians = convertDegreeToRadians(45);
 
         this.rocketNode = null;
@@ -41,8 +42,6 @@ class Movie {
     };
 
     render(timeInMilliseconds) {
-        this.animatedAngle = (timeInMilliseconds / 10) % 360;
-
         //set background to the color of the background sky
         this.gl.clearColor(0.247, 0.647, 1, 1.0);
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
@@ -58,6 +57,7 @@ class Movie {
             let rocketTransMatrix = this.rocketTransformationNode.getMatrix();
             let thrust = (timeInMilliseconds / 1000000) * Math.exp((timeInMilliseconds / 5000));
             rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.translate(0, thrust, 0));
+            rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.rotateY(0.2));
             this.rocketTransformationNode.setMatrix(rocketTransMatrix);
         }
 
