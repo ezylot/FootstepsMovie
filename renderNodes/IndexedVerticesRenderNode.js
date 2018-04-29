@@ -1,9 +1,8 @@
-class CubeRenderNode extends ObjectNode {
+class IndexedVerticesRenderNode extends ObjectNode {
 
-    constructor(verticesBuffer, verticesIndexBuffer, indexLength, colorBuffer, alpha) {
-        super(verticesBuffer, colorBuffer, alpha);
+    constructor(verticesBuffer, verticesIndexBuffer, verticesCount, colorBuffer, alpha) {
+        super(verticesBuffer, verticesCount, colorBuffer, alpha);
         this.verticesIndexBuffer = verticesIndexBuffer;
-        this.indexLength = indexLength;
     }
 
     render(context) {
@@ -25,7 +24,7 @@ class CubeRenderNode extends ObjectNode {
         gl.uniform1f(gl.getUniformLocation(context.shader, 'u_alpha'), this.alpha);
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.verticesIndexBuffer);
-        gl.drawElements(gl.TRIANGLES, this.indexLength, gl.UNSIGNED_SHORT, 0);
+        gl.drawElements(gl.TRIANGLES, this.verticesCount, gl.UNSIGNED_SHORT, 0);
 
         super.render(context);
     }

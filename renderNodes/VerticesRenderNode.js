@@ -1,4 +1,4 @@
-class RectangleRenderNode extends ObjectNode {
+class VerticesRenderNode extends ObjectNode {
     render(context) {
         let modelViewMatrix = mat4.multiply(mat4.create(), context.viewMatrix, context.sceneMatrix);
         let gl = context.gl;
@@ -17,7 +17,7 @@ class RectangleRenderNode extends ObjectNode {
 
         gl.uniform1f(gl.getUniformLocation(context.shader, 'u_alpha'), this.alpha);
 
-        gl.drawArrays(gl.TRIANGLES, 0, 6);
+        gl.drawArrays(gl.TRIANGLES, 0, this.verticesCount);
 
         super.render(context);
     }
