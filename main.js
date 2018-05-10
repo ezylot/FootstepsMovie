@@ -1,10 +1,22 @@
 'use strict';
 
+// This is just for internal testing so we can skip ahead in time
+// For example if you set it to 10000 it will start with scene 2
+const TIME_OFFSET = 0;
+
+const MANUAL_CAMERA_SPEED = 3; // Sane values are between 1 and 10
+const LOOKING_SPEED = 6.1; // Sane values are between 1 and 10
+const X_INVERTED = true;
+const Y_INVERTED = false;
+
 class Movie {
     constructor() {
         this.canvas = document.querySelector('#movieCanvas');
         this.gl = this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl');
         this.shaderProgram = null;
+
+        this.cameraPosition = null;
+        this.cameraTarget = null;
 
         this.scene1 = new SGNode();
         this.scene2 = new SGNode();
@@ -18,7 +30,9 @@ class Movie {
     }
 
     init(resources) {
+        createHtmlText(this.canvas);
         this.shaderProgram = createProgram(this.gl, resources.defaultVS, resources.defaultFS);
+        this.resetCamera();
 
         // Setup rocket
         (function rocket(movie) {
@@ -59,7 +73,6 @@ class Movie {
             // movie.scene3.append(.....)
             // movie.scene3.append(movie.rocketNode)
         })(this);
-
     };
 
     render(timeInMilliseconds) {
@@ -75,6 +88,7 @@ class Movie {
 
         console.log(timeInMilliseconds);
         if(timeInMilliseconds < 10000) {
+            displayText("Scene 1");
             this.rootNode = this.scene1;
 
             // Animation of scene 1
@@ -87,26 +101,27 @@ class Movie {
             }
 
         } else if(timeInMilliseconds < 20000) {
+            displayText("Scene 2");
             this.rootNode = this.scene2;
 
             // Animation of scene 2
         } else {
+            displayText("Scene 3");
             this.rootNode = this.scene3;
 
             // Animation of scene 3
         }
 
         this.rootNode.render(this.createSceneGraphContext(this.gl, this.shaderProgram));
-
-        window.requestAnimationFrame((timestamp) => this.render(timestamp));
+        window.requestAnimationFrame((timestamp) => this.render(TIME_OFFSET + timestamp));
     };
 
     createSceneGraphContext(gl, shader) {
         let projectionMatrix = mat4.perspective(mat4.create(), this.fieldOfViewInRadians, this.canvas.width / this.canvas.height, 0.01, 20);
         gl.uniformMatrix4fv(gl.getUniformLocation(shader, 'u_projection'), false, projectionMatrix);
 
-        let eye = vec3.fromValues(1, 3, 8);
-        let center = vec3.fromValues(0, 2, 0);
+        let eye = this.cameraPosition;
+        let center = this.cameraTarget;
         let up = vec3.fromValues(0, 1, 0);
         let viewMatrix = mat4.lookAt(mat4.create(), eye, center, up);
 
@@ -118,6 +133,60 @@ class Movie {
             shader: shader
         };
     };
+
+
+    /********** Camera movement *********/
+
+    resetCamera() {
+        this.cameraPosition = vec3.fromValues(1, 3, 8)
+        this.cameraTarget = vec3.fromValues(0, 2, 0)
+    };
+
+    turnCamera(x, y) {
+        this.cameraTarget[0] += x;
+        this.cameraTarget[1] += y;
+    };
+
+    moveCloser() {
+        let viewVector = this.calculateViewVector();
+        let internalMultiplier = 30;
+
+        this.cameraPosition[0] = this.cameraPosition[0] + MANUAL_CAMERA_SPEED / internalMultiplier * viewVector[0];
+        this.cameraPosition[1] = this.cameraPosition[1] + MANUAL_CAMERA_SPEED / internalMultiplier * viewVector[1];
+        this.cameraPosition[2] = this.cameraPosition[2] + MANUAL_CAMERA_SPEED / internalMultiplier * viewVector[2];
+
+        this.cameraTarget[0] = this.cameraTarget[0] + MANUAL_CAMERA_SPEED / internalMultiplier *  viewVector[0];
+        this.cameraTarget[1] = this.cameraTarget[1] + MANUAL_CAMERA_SPEED / internalMultiplier *  viewVector[1];
+        this.cameraTarget[2] = this.cameraTarget[2] + MANUAL_CAMERA_SPEED / internalMultiplier *  viewVector[2];
+    };
+
+    moveFurther() {
+        let viewVector = this.calculateViewVector();
+        let internalMultiplier = 30;
+
+        this.cameraPosition[0] = this.cameraPosition[0] - MANUAL_CAMERA_SPEED / internalMultiplier * viewVector[0];
+        this.cameraPosition[1] = this.cameraPosition[1] - MANUAL_CAMERA_SPEED / internalMultiplier * viewVector[1];
+        this.cameraPosition[2] = this.cameraPosition[2] - MANUAL_CAMERA_SPEED / internalMultiplier * viewVector[2];
+
+        this.cameraTarget[0] = this.cameraTarget[0] - MANUAL_CAMERA_SPEED / internalMultiplier * viewVector[0];
+        this.cameraTarget[1] = this.cameraTarget[1] - MANUAL_CAMERA_SPEED / internalMultiplier * viewVector[1];
+        this.cameraTarget[2] = this.cameraTarget[2] - MANUAL_CAMERA_SPEED / internalMultiplier * viewVector[2];
+    };
+
+    calculateViewVector() {
+        let viewVector = [
+            this.cameraTarget[0] - this.cameraPosition[0],
+            this.cameraTarget[1] - this.cameraPosition[1],
+            this.cameraTarget[2] - this.cameraPosition[2]
+        ];
+        let length = Math.sqrt(Math.pow(viewVector[0], 2) + Math.pow(viewVector[1], 2) + Math.pow(viewVector[2], 2));
+
+        return [
+            viewVector[0] / length,
+            viewVector[1] / length,
+            viewVector[2] / length
+        ];
+    }
 }
 
 loadResources({
@@ -126,7 +195,70 @@ loadResources({
 }).then(resources => {
     let movie = new Movie();
     movie.init(resources);
-    movie.render(performance.now());
+    movie.render(TIME_OFFSET + performance.now());
+
+    let arrowUpInterval = null;
+    let arrowDownInterval = null;
+
+    document.addEventListener('keydown', function(event) {
+        // On Space press reset camera to normal position
+        if(event.key === ' ' || event.key.toLocaleLowerCase() === 'spacebar') {
+            event.preventDefault();
+            movie.resetCamera();
+        }
+
+        // On Arrow up we fly closer
+        if(event.key === "ArrowUp" && arrowUpInterval == null) {
+            arrowUpInterval = setInterval(() => movie.moveCloser(), 10);
+        }
+        if(event.key === "ArrowDown" && arrowDownInterval == null) {
+            arrowDownInterval = setInterval(() => movie.moveFurther(), 10);
+        }
+    });
+
+    document.addEventListener('keyup', function(event) {
+        // On Arrow up we fly closer
+        if(event.key === "ArrowUp") {
+            if(arrowUpInterval != null) {
+                clearInterval(arrowUpInterval);
+                arrowUpInterval = null;
+            }
+        }
+        if(event.key === "ArrowDown") {
+            if(arrowDownInterval != null) {
+                clearInterval(arrowDownInterval);
+                arrowDownInterval = null;
+            }
+        }
+    });
+
+    let lastSeenAt = {x: null, y: null};
+    let canvas = document.querySelector('#movieCanvas');
+    let lookEnabled = false;
+
+    document.addEventListener('mousedown', function(event) {
+        lastSeenAt = { x: event.clientX, y: event.clientY };
+        lookEnabled = true;
+    });
+
+    document.addEventListener('mouseup', function() {
+        lookEnabled = false;
+    });
+
+    document.addEventListener('mousemove', function(event) {
+        if(lookEnabled) {
+            let xMovement = (event.clientX - lastSeenAt.x) / canvas.width * LOOKING_SPEED;
+            let yMovement = (event.clientY - lastSeenAt.y) / canvas.height * LOOKING_SPEED;
+
+            if(X_INVERTED) { xMovement *= -1; }
+            if(Y_INVERTED) { yMovement *= -1; }
+
+            movie.turnCamera(xMovement, yMovement);
+
+            lastSeenAt.x = event.clientX;
+            lastSeenAt.y = event.clientY;
+        }
+    });
 });
 
 function convertDegreeToRadians(degree) {
