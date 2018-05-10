@@ -15,6 +15,8 @@ class Movie {
 
         this.rocketNode = null;
         this.scene1rocketTransformationNode = null;
+        this.scene2rocketTransformationNode = null;
+
     }
 
     init(resources) {
@@ -50,8 +52,27 @@ class Movie {
 
         // Setup scene 2
         (function scene2(movie) {
-            // movie.scene2.append(.....)
-            // movie.scene2.append(movie.rocketNode)
+            //Set up the earth
+            /*let earthTransformationMatrix = mat4.create();
+            earthTransformationMatrix = mat4.multiply(mat4.create(), earthTransformationMatrix, glm.scale(2, 0, 2));
+            earthTransformationMatrix = mat4.multiply(mat4.create(), earthTransformationMatrix, glm.rotateX(90));
+            let earthTransformationNode = new TransformationSGNode(earthTransformationMatrix);
+            movie.scene2.append(earthTransformationNode);
+
+            let earthNode = createEarthNode(movie.gl);
+            earthTransformationNode.append(earthNode);*/
+
+
+            let rocketTransformationMatrix = mat4.create();
+            rocketTransformationMatrix = mat4.multiply(mat4.create(),rocketTransformationMatrix,glm.translate(-5.5,1,-1))
+            rocketTransformationMatrix = mat4.multiply(mat4.create(), rocketTransformationMatrix, glm.rotateY(-20));
+            rocketTransformationMatrix = mat4.multiply(mat4.create(), rocketTransformationMatrix, glm.rotateZ(280));
+            movie.scene2rocketTransformationNode = new TransformationSGNode(rocketTransformationMatrix);
+
+            // Add rocket to scene
+            movie.scene2.append(movie.scene2rocketTransformationNode);
+            movie.scene2rocketTransformationNode.append(movie.rocketNode);
+
         })(this);
 
         // Setup scene 3
@@ -78,7 +99,7 @@ class Movie {
             this.rootNode = this.scene1;
 
             // Animation of scene 1
-            if(timeInMilliseconds > 2000) {
+            /*if(timeInMilliseconds > 2000) {
                 let rocketTransMatrix = this.scene1rocketTransformationNode.matrix;
                 let thrust = (timeInMilliseconds / 1000000) * Math.exp((timeInMilliseconds / 5000));
                 rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.translate(0, thrust, 0));
@@ -86,10 +107,15 @@ class Movie {
                 this.scene1rocketTransformationNode.matrix = rocketTransMatrix;
             }
 
-        } else if(timeInMilliseconds < 20000) {
+        } else if(timeInMilliseconds < 20000) {*/
             this.rootNode = this.scene2;
 
             // Animation of scene 2
+                let rocketTransMatrix = this.scene2rocketTransformationNode.matrix;
+                let thrust = (timeInMilliseconds / 1000000) * Math.exp((timeInMilliseconds / 5000));
+                rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.translate(0, thrust, 0));
+                rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.rotateY(0.2));
+                this.scene2rocketTransformationNode.matrix = rocketTransMatrix;
         } else {
             this.rootNode = this.scene3;
 
