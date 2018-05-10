@@ -46,7 +46,7 @@ class Movie {
         (function scene1(movie) {
             // Set up the green floor
             let floorTransformationMatrix = mat4.create();
-            floorTransformationMatrix = mat4.multiply(mat4.create(), floorTransformationMatrix, glm.scale(8, 0, 8));
+            floorTransformationMatrix = mat4.multiply(mat4.create(), floorTransformationMatrix, glm.scale(20, 0, 20));
             floorTransformationMatrix = mat4.multiply(mat4.create(), floorTransformationMatrix, glm.rotateX(90));
 
             let floorTransformationNode = new TransformationSGNode(floorTransformationMatrix);
@@ -57,7 +57,7 @@ class Movie {
 
             // Setup pedestal of rocket
             let pedestalTransformationMatrix = mat4.create();
-            pedestalTransformationMatrix = mat4.multiply(mat4.create(), pedestalTransformationMatrix, glm.scale(2, 0.2, 2));
+            pedestalTransformationMatrix = mat4.multiply(mat4.create(), pedestalTransformationMatrix, glm.scale(4, 0.2, 4));
             let pedestalTransformationNode = new TransformationSGNode(pedestalTransformationMatrix);
 
             let pedestalNode = getPedestal(movie.gl);
@@ -66,11 +66,11 @@ class Movie {
 
             // Setup rocket
             let rocketTransformationMatrix = mat4.create();
-            rocketTransformationMatrix = mat4.multiply(mat4.create(), rocketTransformationMatrix, glm.translate(0, 0.2, 0));
+            rocketTransformationMatrix = mat4.multiply(mat4.create(), rocketTransformationMatrix, glm.translate(0, 0.201, 0));
             movie.scene1rocketTransformationNode = new TransformationSGNode(rocketTransformationMatrix);
 
-            movie.scene1.append(movie.scene1rocketTransformationNode);
             movie.scene1rocketTransformationNode.append(movie.rocketNode);
+            movie.scene1.append(movie.scene1rocketTransformationNode);
         })(this);
 
         // Setup scene 2
