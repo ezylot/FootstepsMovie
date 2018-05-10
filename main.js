@@ -46,7 +46,7 @@ class Movie {
         (function scene1(movie) {
             // Set up the green floor
             let floorTransformationMatrix = mat4.create();
-            floorTransformationMatrix = mat4.multiply(mat4.create(), floorTransformationMatrix, glm.scale(2, 0, 2));
+            floorTransformationMatrix = mat4.multiply(mat4.create(), floorTransformationMatrix, glm.scale(8, 0, 8));
             floorTransformationMatrix = mat4.multiply(mat4.create(), floorTransformationMatrix, glm.rotateX(90));
 
             let floorTransformationNode = new TransformationSGNode(floorTransformationMatrix);
@@ -55,11 +55,20 @@ class Movie {
             let floorNode = createFloorNode(movie.gl);
             floorTransformationNode.append(floorNode);
 
+            // Setup pedestal of rocket
+            let pedestalTransformationMatrix = mat4.create();
+            pedestalTransformationMatrix = mat4.multiply(mat4.create(), pedestalTransformationMatrix, glm.scale(2, 0.2, 2));
+            let pedestalTransformationNode = new TransformationSGNode(pedestalTransformationMatrix);
+
+            let pedestalNode = getPedestal(movie.gl);
+            pedestalTransformationNode.append(pedestalNode);
+            movie.scene1.append(pedestalTransformationNode);
+
+            // Setup rocket
             let rocketTransformationMatrix = mat4.create();
-            rocketTransformationMatrix = mat4.multiply(mat4.create(), rocketTransformationMatrix, glm.rotateY(30));
+            rocketTransformationMatrix = mat4.multiply(mat4.create(), rocketTransformationMatrix, glm.translate(0, 0.2, 0));
             movie.scene1rocketTransformationNode = new TransformationSGNode(rocketTransformationMatrix);
 
-            // Add rocket to scene
             movie.scene1.append(movie.scene1rocketTransformationNode);
             movie.scene1rocketTransformationNode.append(movie.rocketNode);
         })(this);
@@ -109,31 +118,41 @@ class Movie {
 
         console.log(timeInMilliseconds);
         if(timeInMilliseconds < 10000) {
-            displayText("Scene 1");
-            this.rootNode = this.scene1;
+            if(this.rootNode !== this.scene1) {
+                this.rootNode = this.scene1;
+                this.resetCamera();
+                displayText("Scene 1");
+            }
 
             // Animation of scene 1
             if(timeInMilliseconds > 2000) {
                 let rocketTransMatrix = this.scene1rocketTransformationNode.matrix;
                 let thrust = (timeInMilliseconds / 1000000) * Math.exp((timeInMilliseconds / 5000));
                 rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.translate(0, thrust, 0));
-                rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.rotateY(0.2));
+                rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.rotateY(0.1));
                 this.scene1rocketTransformationNode.matrix = rocketTransMatrix;
             }
 
         } else if(timeInMilliseconds < 20000) {
-            displayText("Scene 2");
-            this.rootNode = this.scene2;
+            if(this.rootNode !== this.scene2) {
+                this.rootNode = this.scene2;
+                this.resetCamera();
+                displayText("Scene 2");
+            }
 
             // Animation of scene 2
                 let rocketTransMatrix = this.scene2rocketTransformationNode.matrix;
                 let thrust = (timeInMilliseconds / 1000000) * Math.exp((timeInMilliseconds / 5000));
                 rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.translate(0, thrust, 0));
-                rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.rotateY(0.2));
+                rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.rotateY(0.01));
                 this.scene2rocketTransformationNode.matrix = rocketTransMatrix;
         } else {
-            displayText("Scene 3");
-            this.rootNode = this.scene3;
+            if(this.rootNode !== this.scene3) {
+                this.rootNode = this.scene3;
+                this.resetCamera();
+                displayText("Scene 3");
+            }
+
 
             // Animation of scene 3
         }
