@@ -127,9 +127,11 @@ class Movie {
             // Animation of scene 1
             if(timeInMilliseconds > 2000) {
                 let rocketTransMatrix = this.scene1rocketTransformationNode.matrix;
-                let thrust = (timeInMilliseconds / 1000000) * Math.exp((timeInMilliseconds / 5000));
+                let thrust = (timeInMilliseconds / 1000000) * Math.exp((timeInMilliseconds - 2000) / 3000);
                 rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.translate(0, thrust, 0));
-                rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.rotateY(0.1));
+                if(timeInMilliseconds > 2500) {
+                    rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.rotateY(0.1));
+                }
                 this.scene1rocketTransformationNode.matrix = rocketTransMatrix;
             }
 
@@ -253,23 +255,23 @@ loadResources({
         }
 
         // On Arrow up we fly closer
-        if(event.key === "ArrowUp" && arrowUpInterval == null) {
+        if(["arrowup", "w"].includes(event.key.toLowerCase()) && arrowUpInterval == null) {
             arrowUpInterval = setInterval(() => movie.moveCloser(), 10);
         }
-        if(event.key === "ArrowDown" && arrowDownInterval == null) {
+        if(["arrowdown", "s"].includes(event.key.toLowerCase()) && arrowDownInterval == null) {
             arrowDownInterval = setInterval(() => movie.moveFurther(), 10);
         }
     });
 
     document.addEventListener('keyup', function(event) {
         // On Arrow up we fly closer
-        if(event.key === "ArrowUp") {
+        if(["arrowup", "w"].includes(event.key.toLowerCase())) {
             if(arrowUpInterval != null) {
                 clearInterval(arrowUpInterval);
                 arrowUpInterval = null;
             }
         }
-        if(event.key === "ArrowDown") {
+        if(["arrowdown", "s"].includes(event.key.toLowerCase())) {
             if(arrowDownInterval != null) {
                 clearInterval(arrowDownInterval);
                 arrowDownInterval = null;

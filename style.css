@@ -5,4 +5,5 @@ p {
   color: #2F4F4F;
   letter-spacing: 1px;
   text-align: center;
+  user-select: none;
 }
