@@ -1,4 +1,4 @@
-class ObjectNode extends RootNode {
+class ObjectNode extends SGNode {
     constructor(verticesBuffer, verticesCount, colorBuffer, alpha) {
         super();
         this.verticesBuffer = verticesBuffer;

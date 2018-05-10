@@ -1,4 +1,4 @@
-class ShaderNode extends RootNode {
+class ShaderNode extends SGNode {
     constructor(shader) {
         super();
         this.shader = shader;

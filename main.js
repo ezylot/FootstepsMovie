@@ -5,7 +5,7 @@ class Movie {
         this.canvas = document.querySelector('#movieCanvas');
         this.gl = this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl');
         this.shaderProgram = null;
-        this.rootNode = new RootNode();
+        this.rootNode = new SGNode();
         this.fieldOfViewInRadians = convertDegreeToRadians(45);
 
         this.rocketNode = null;
@@ -20,25 +20,21 @@ class Movie {
         floorTransformationMatrix = mat4.multiply(mat4.create(), floorTransformationMatrix, glm.scale(2, 0, 2));
         floorTransformationMatrix = mat4.multiply(mat4.create(), floorTransformationMatrix, glm.rotateX(90));
 
-        let floorTransformationNode = new TransformationNode(floorTransformationMatrix);
+        let floorTransformationNode = new TransformationSGNode(floorTransformationMatrix);
         this.rootNode.append(floorTransformationNode);
 
         let floorNode = createFloorNode(this.gl);
         floorTransformationNode.append(floorNode);
 
-
         // Setup rocket object
         let rocketTransformationMatrix = mat4.create();
         rocketTransformationMatrix = mat4.multiply(mat4.create(), rocketTransformationMatrix, glm.rotateY(30));
 
-        this.rocketTransformationNode = new TransformationNode(rocketTransformationMatrix);
+        this.rocketTransformationNode = new TransformationSGNode(rocketTransformationMatrix);
         this.rootNode.append(this.rocketTransformationNode);
 
-        let rocketColorNode = new ShaderNode(createProgram(this.gl, resources.defaultVS, resources.defaultFS));
-        this.rocketTransformationNode.append(rocketColorNode);
-
         this.rocketNode = createRocketNode(this.gl);
-        rocketColorNode.append(this.rocketNode);
+        this.rocketTransformationNode.append(this.rocketNode);
     };
 
     render(timeInMilliseconds) {
@@ -54,11 +50,11 @@ class Movie {
 
 
         if(timeInMilliseconds > 2000) {
-            let rocketTransMatrix = this.rocketTransformationNode.getMatrix();
+            let rocketTransMatrix = this.rocketTransformationNode.matrix;
             let thrust = (timeInMilliseconds / 1000000) * Math.exp((timeInMilliseconds / 5000));
             rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.translate(0, thrust, 0));
             rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.rotateY(0.2));
-            this.rocketTransformationNode.setMatrix(rocketTransMatrix);
+            this.rocketTransformationNode.matrix = rocketTransMatrix;
         }
 
         this.rootNode.render(this.createSceneGraphContext(this.gl, this.shaderProgram));
