@@ -76,14 +76,14 @@ class Movie {
         // Setup scene 2
         (function scene2(movie) {
             //Set up the earth
-            /*let earthTransformationMatrix = mat4.create();
-            earthTransformationMatrix = mat4.multiply(mat4.create(), earthTransformationMatrix, glm.scale(2, 0, 2));
+            let earthTransformationMatrix = mat4.create();
+            earthTransformationMatrix = mat4.multiply(mat4.create(), earthTransformationMatrix, glm.scale(-6,1,-1));
             earthTransformationMatrix = mat4.multiply(mat4.create(), earthTransformationMatrix, glm.rotateX(90));
             let earthTransformationNode = new TransformationSGNode(earthTransformationMatrix);
             movie.scene2.append(earthTransformationNode);
 
             let earthNode = createEarthNode(movie.gl);
-            earthTransformationNode.append(earthNode);*/
+            earthTransformationNode.append(earthNode);
 
 
             let rocketTransformationMatrix = mat4.create();
@@ -144,7 +144,7 @@ class Movie {
 
             // Animation of scene 2
                 let rocketTransMatrix = this.scene2rocketTransformationNode.matrix;
-                let thrust = (timeInMilliseconds / 1000000) * Math.exp((timeInMilliseconds / 5000));
+                let thrust = (timeInMilliseconds / 1000500) * Math.exp((timeInMilliseconds / 50000));
                 rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.translate(0, thrust, 0));
                 rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.rotateY(0.01));
                 this.scene2rocketTransformationNode.matrix = rocketTransMatrix;
