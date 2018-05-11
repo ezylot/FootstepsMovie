@@ -28,7 +28,8 @@ class Movie {
         this.rocketNode = null;
         this.scene1rocketTransformationNode = null;
         this.scene2rocketTransformationNode = null;
-
+        this.scene3moonTransformationNode = null;
+        this.scene3cockpitOverlayTransformationNode = null;
     }
 
     init(resources) {
@@ -76,14 +77,14 @@ class Movie {
         // Setup scene 2
         (function scene2(movie) {
             //Set up the earth
-            let earthTransformationMatrix = mat4.create();
+            /*let earthTransformationMatrix = mat4.create();
             earthTransformationMatrix = mat4.multiply(mat4.create(), earthTransformationMatrix, glm.scale(-6,1,-1));
             earthTransformationMatrix = mat4.multiply(mat4.create(), earthTransformationMatrix, glm.rotateX(90));
             let earthTransformationNode = new TransformationSGNode(earthTransformationMatrix);
             movie.scene2.append(earthTransformationNode);
 
             let earthNode = createEarthNode(movie.gl);
-            earthTransformationNode.append(earthNode);
+            earthTransformationNode.append(earthNode);*/
 
 
             let rocketTransformationMatrix = mat4.create();
@@ -100,6 +101,25 @@ class Movie {
 
         // Setup scene 3
         (function scene3(movie) {
+            let moonNode = createMoon(movie.gl);
+
+            let moonTransformationMatrix = mat4.create();
+            moonTransformationMatrix = mat4.multiply(mat4.create(), moonTransformationMatrix,glm.translate(0,-7,-6));
+            movie.scene3moonTransformationNode = new TransformationSGNode(moonTransformationMatrix);
+            movie.scene3moonTransformationNode.append(moonNode);
+
+            movie.scene3.append(movie.scene3moonTransformationNode);
+
+            movie.scene3cockpitOverlayTransformationNode = new TransformationSGNode(mat4.identity(mat4.create()));
+
+            let cockpitScaleMatrix = glm.scale(3, 3, 1);
+            let cockpitScaleNode = new TransformationSGNode(cockpitScaleMatrix);
+            cockpitScaleNode.append(createCockpitOverlay(movie.gl));
+
+            movie.scene3cockpitOverlayTransformationNode.append(cockpitScaleNode);
+            movie.scene3.append(movie.scene3cockpitOverlayTransformationNode);
+
+
             // movie.scene3.append(.....)
             // movie.scene3.append(movie.rocketNode)
         })(this);
@@ -107,17 +127,17 @@ class Movie {
 
     render(timeInMilliseconds) {
         //set background to the color of the background sky
-        this.gl.clearColor(0.247, 0.647, 1, 1.0);
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-
         this.gl.enable(this.gl.DEPTH_TEST);
         this.gl.enable(this.gl.BLEND);
         this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
 
         this.gl.useProgram(this.shaderProgram);
 
-        console.log(timeInMilliseconds);
+        //console.log(timeInMilliseconds);
         if(timeInMilliseconds < 10000) {
+            this.gl.clearColor(0.247, 0.647, 1, 1.0);
+            this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+
             if(this.rootNode !== this.scene1) {
                 this.rootNode = this.scene1;
                 this.resetCamera();
@@ -136,6 +156,10 @@ class Movie {
             }
 
         } else if(timeInMilliseconds < 20000) {
+            // Black background for outer space
+            this.gl.clearColor(0,0,0,1);
+            this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+
             if(this.rootNode !== this.scene2) {
                 this.rootNode = this.scene2;
                 this.resetCamera();
@@ -149,12 +173,30 @@ class Movie {
                 rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.rotateY(0.01));
                 this.scene2rocketTransformationNode.matrix = rocketTransMatrix;
         } else {
+            // Black background for outer space
+            this.gl.clearColor(0,0,0,1);
+            this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+
             if(this.rootNode !== this.scene3) {
                 this.rootNode = this.scene3;
                 this.resetCamera();
                 displayText("Scene 3");
             }
 
+
+            // Keep overlay in front of camera
+
+            let translateMatrix = glm.translate(
+                this.cameraPosition[0] + (this.cameraTarget[0] - this.cameraPosition[0]),
+                this.cameraPosition[1] + (this.cameraTarget[1] - this.cameraPosition[1]),
+                this.cameraPosition[2] + (this.cameraTarget[2] - this.cameraPosition[2]),
+            );
+
+            let rotateMatrix = glm.rotateX(0);
+            rotateMatrix = mat4.multiply(mat4.create(), rotateMatrix, glm.rotateY(0));
+            rotateMatrix = mat4.multiply(mat4.create(), rotateMatrix, glm.rotateZ(0));
+
+            this.scene3cockpitOverlayTransformationNode.matrix = mat4.multiply(mat4.create(), translateMatrix, rotateMatrix);
 
             // Animation of scene 3
         }

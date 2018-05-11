@@ -1,4 +1,4 @@
-function createFloorNode(gl) {
+function createCockpitOverlay(gl) {
     let quadVertices = new Float32Array([
         -1.0, -1.0,
         1.0, -1.0,
@@ -7,7 +7,7 @@ function createFloorNode(gl) {
         1.0, -1.0,
         1.0, 1.0]);
 
-    let quadColors = new Float32Array(repeat([0.384, 0.976, 0.043], quadVertices.length / 2));
+    let quadColors = new Float32Array(repeat([0.9, 0.9, 0.9], quadVertices.length / 2));
 
     let quadVertexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, quadVertexBuffer);
@@ -17,5 +17,5 @@ function createFloorNode(gl) {
     gl.bindBuffer(gl.ARRAY_BUFFER, quadColorBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, quadColors, gl.STATIC_DRAW);
 
-    return new VerticesRenderNode(quadVertexBuffer, quadVertices.length / 2, quadColorBuffer, 1.0);
+    return new VerticesRenderNode(quadVertexBuffer, quadVertices.length / 2, quadColorBuffer, 0.2);
 }
