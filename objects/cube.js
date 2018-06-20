@@ -34,5 +34,9 @@ function createCube(gl, color) {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeIndexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(cubeIndices), gl.STATIC_DRAW);
 
-    return new IndexedVerticesRenderNode(cubeVertexBuffer, cubeIndexBuffer, cubeIndices.length, cubeColorBuffer, 1);
+    let colorNode = new ColorNode(cubeColorBuffer, 1);
+    let cubeNode = new IndexedVerticesRenderNode(cubeVertexBuffer, cubeIndexBuffer, cubeIndices.length);
+
+    colorNode.append(cubeNode);
+    return colorNode;
 }

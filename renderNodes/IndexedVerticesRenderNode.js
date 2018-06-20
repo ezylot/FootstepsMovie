@@ -1,7 +1,7 @@
 class IndexedVerticesRenderNode extends ObjectNode {
 
-    constructor(verticesBuffer, verticesIndexBuffer, verticesCount, colorBuffer, alpha) {
-        super(verticesBuffer, verticesCount, colorBuffer, alpha);
+    constructor(verticesBuffer, verticesIndexBuffer, verticesCount) {
+        super(verticesBuffer, verticesCount);
         this.verticesIndexBuffer = verticesIndexBuffer;
     }
 
@@ -15,13 +15,6 @@ class IndexedVerticesRenderNode extends ObjectNode {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
         gl.vertexAttribPointer(positionLocation, 3, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(positionLocation);
-
-        let colorLocation = gl.getAttribLocation(context.shader, 'a_color');
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.colorBuffer);
-        gl.vertexAttribPointer(colorLocation, 3, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(colorLocation);
-
-        gl.uniform1f(gl.getUniformLocation(context.shader, 'u_alpha'), this.alpha);
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.verticesIndexBuffer);
         gl.drawElements(gl.TRIANGLES, this.verticesCount, gl.UNSIGNED_SHORT, 0);

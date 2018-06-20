@@ -46,5 +46,7 @@ function createEarthNode(gl) {
     gl.bindBuffer(gl.ARRAY_BUFFER, squareColorBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, squareColors, gl.STATIC_DRAW);
 
-    return new VerticesRenderNode(squareVertexBuffer, squareVertices.length / 2, squareColorBuffer, 0.6);
+    return new ColorNode(squareColorBuffer, 1.0, [
+        new VerticesRenderNode(squareVertexBuffer, squareVertices.length / 2)
+    ]);
 }

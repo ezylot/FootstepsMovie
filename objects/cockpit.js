@@ -17,5 +17,7 @@ function createCockpitOverlay(gl) {
     gl.bindBuffer(gl.ARRAY_BUFFER, quadColorBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, quadColors, gl.STATIC_DRAW);
 
-    return new VerticesRenderNode(quadVertexBuffer, quadVertices.length / 2, quadColorBuffer, 0.2);
+    return new ColorNode(quadColorBuffer, 0.2, [
+        new VerticesRenderNode(quadVertexBuffer, quadVertices.length / 2)
+    ]);
 }

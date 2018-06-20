@@ -31,5 +31,9 @@ function createTriangleWithDepth(gl, color) {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, triangleIndexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(triangleIndices), gl.STATIC_DRAW);
 
-    return new IndexedVerticesRenderNode(triangleVertexBuffer, triangleIndexBuffer, triangleIndices.length, triangleColorBuffer, 1);
+    let colorNode = new ColorNode(triangleColorBuffer, 1);
+    let triangleNode = new IndexedVerticesRenderNode(triangleVertexBuffer, triangleIndexBuffer, triangleIndices.length);
+    colorNode.append(triangleNode);
+
+    return colorNode;
 }

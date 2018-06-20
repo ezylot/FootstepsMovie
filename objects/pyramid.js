@@ -29,5 +29,9 @@ function createPyramid(gl, color) {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, pyramidIndexBuffer);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(pyramidIndices), gl.STATIC_DRAW);
 
-    return new IndexedVerticesRenderNode(pyramidVertexBuffer, pyramidIndexBuffer, pyramidIndices.length, pyramidColorBuffer, 1);
+    let colorNode = new ColorNode(pyramidColorBuffer, 1);
+    let pyramidNode = new IndexedVerticesRenderNode(pyramidVertexBuffer, pyramidIndexBuffer, pyramidIndices.length);
+    colorNode.append(pyramidNode);
+
+    return colorNode;
     }

@@ -2,7 +2,7 @@
 
 // This is just for internal testing so we can skip ahead in time
 // For example if you set it to 10000 it will start with scene 2
-const TIME_OFFSET = 0;
+const TIME_OFFSET = 20000;
 
 const MANUAL_CAMERA_SPEED = 3; // Sane values are between 1 and 10
 const LOOKING_SPEED = 6.1; // Sane values are between 1 and 10
