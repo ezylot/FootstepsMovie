@@ -30,6 +30,8 @@ class Movie {
         this.scene2rocketTransformationNode = null;
         this.scene3moonTransformationNode = null;
         this.scene3cockpitOverlayTransformationNode = null;
+
+        this.scene2CubeTexture = null;
     }
 
     init(resources) {
@@ -42,6 +44,31 @@ class Movie {
             // Setup rocket object
             movie.rocketNode = createRocketNode(movie.gl);
         })(this);
+
+        // Setup background for scene 2 and 3
+        (function initBackground(movie, resources) {
+            let gl = movie.gl;
+            movie.scene2CubeTexture = gl.createTexture();
+
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_CUBE_MAP, movie.scene2CubeTexture);
+
+            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT);
+            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
+
+            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.env_pos_x);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.env_neg_x);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.env_pos_y);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.env_neg_y);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.env_pos_z);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.env_neg_z);
+
+            gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
+        })(this, resources);
 
         // Setup scene 1
         (function scene1(movie) {
@@ -76,6 +103,11 @@ class Movie {
 
         // Setup scene 2
         (function scene2(movie) {
+            let skybox = new EnvironmentSGNode(movie.scene2CubeTexture, 4, false, new RenderSGNode(makeSphere(50)));
+            let shaderNode = new ShaderSGNode(createProgram(movie.gl, resources.envVS,  resources.envFS));
+            shaderNode.append(skybox);
+            movie.scene2.append(shaderNode);
+
             //Set up the earth
             /*let earthTransformationMatrix = mat4.create();
             earthTransformationMatrix = mat4.multiply(mat4.create(), earthTransformationMatrix, glm.scale(-6,1,-1));
@@ -85,7 +117,6 @@ class Movie {
 
             let earthNode = createEarthNode(movie.gl);
             earthTransformationNode.append(earthNode);*/
-
 
             let rocketTransformationMatrix = mat4.create();
             rocketTransformationMatrix = mat4.multiply(mat4.create(),rocketTransformationMatrix,glm.translate(-5.5,1,-1))
@@ -101,6 +132,11 @@ class Movie {
 
         // Setup scene 3
         (function scene3(movie) {
+            let skybox = new EnvironmentSGNode(movie.scene2CubeTexture, 4, false, new RenderSGNode(makeSphere(50)));
+            let shaderNode = new ShaderSGNode(createProgram(movie.gl, resources.envVS,  resources.envFS));
+            shaderNode.append(skybox);
+            movie.scene3.append(shaderNode);
+
             let moonNode = createMoon(movie.gl);
 
             let moonTransformationMatrix = mat4.create();
@@ -206,7 +242,7 @@ class Movie {
     };
 
     createSceneGraphContext(gl, shader) {
-        let projectionMatrix = mat4.perspective(mat4.create(), this.fieldOfViewInRadians, this.canvas.width / this.canvas.height, 0.01, 20);
+        let projectionMatrix = mat4.perspective(mat4.create(), this.fieldOfViewInRadians, this.canvas.width / this.canvas.height, 0.01, 100);
         gl.uniformMatrix4fv(gl.getUniformLocation(shader, 'u_projection'), false, projectionMatrix);
 
         let eye = this.cameraPosition;
@@ -219,7 +255,8 @@ class Movie {
             sceneMatrix: mat4.create(),
             viewMatrix: viewMatrix,
             projectionMatrix: projectionMatrix,
-            shader: shader
+            shader: shader,
+            invViewMatrix: mat4.invert(mat4.create(), viewMatrix)
         };
     };
 
@@ -281,6 +318,15 @@ class Movie {
 loadResources({
     defaultVS: 'shaders/simple.vs.glsl',
     defaultFS: 'shaders/simple.fs.glsl',
+    envVS: 'shaders/envmap.vs.glsl',
+    envFS: 'shaders/envmap.fs.glsl',
+
+    env_pos_x: 'textures/skybox/Galaxy_RT.jpg',
+    env_neg_x: 'textures/skybox/Galaxy_LT.jpg',
+    env_pos_y: 'textures/skybox/Galaxy_DN.jpg',
+    env_neg_y: 'textures/skybox/Galaxy_UP.jpg',
+    env_pos_z: 'textures/skybox/Galaxy_FT.jpg',
+    env_neg_z: 'textures/skybox/Galaxy_BK.jpg'
 }).then(resources => {
     let movie = new Movie();
     movie.init(resources);
