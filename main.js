@@ -24,6 +24,7 @@ class Movie {
         this.scene2 = new SGNode();
         this.scene3 = new SGNode();
         this.rootNode = null;
+        this.sceneGraphRootNode = null;
 
         this.fieldOfViewInRadians = convertDegreeToRadians(45);
 
@@ -162,7 +163,7 @@ class Movie {
                 floor
             ]));
 
-            let spotLight = new SpotlightSGNode([0, 1, 1], [0, 0, 0], 30);
+            let spotLight = new SpotlightSGNode([0, 1, 10], [0, 0, 0], 30);
 
             movie.scene1.append(spotLight);
 
@@ -202,11 +203,13 @@ class Movie {
             this.gl.clearColor(0.247, 0.647, 1, 1.0);
             this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
-            if(this.rootNode !== this.scene1) {
-                this.rootNode = this.scene1;
+            if(this.sceneGraphRootNode !== this.scene1) {
+                let enableLight2Node = new SetUniformSGNode("u_enableLight2", 1);
+                this.sceneGraphRootNode = this.scene1;
+                enableLight2Node.append(this.sceneGraphRootNode);
+                this.rootNode = enableLight2Node;
                 this.resetCamera();
                 displayText("Scene 1");
-
             }
 
             // Animation of scene 1
@@ -222,8 +225,11 @@ class Movie {
 
         } else if(timeInMilliseconds < 20000) {
 
-            if(this.rootNode !== this.scene2) {
-                this.rootNode = this.scene2;
+            if(this.sceneGraphRootNode !== this.scene2) {
+                let enableLight2Node = new SetUniformSGNode("u_enableLight2", 1);
+                this.sceneGraphRootNode = this.scene2;
+                enableLight2Node.append(this.sceneGraphRootNode);
+                this.rootNode = enableLight2Node;
                 this.resetCamera();
                 displayText("Scene 2");
 
@@ -247,8 +253,11 @@ class Movie {
             this.gl.clearColor(0,0,0,1);
             this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
-            if(this.rootNode !== this.scene3) {
-                this.rootNode = this.scene3;
+            if(this.sceneGraphRootNode !== this.scene3) {
+                let enableLight2Node = new SetUniformSGNode("u_enableLight2", 0);
+                this.sceneGraphRootNode = this.scene3;
+                enableLight2Node.append(this.sceneGraphRootNode);
+                this.rootNode = enableLight2Node;
                 this.resetCamera();
                 displayText("Scene 3");
                 this.rocketNode.matrix = mat4.create();

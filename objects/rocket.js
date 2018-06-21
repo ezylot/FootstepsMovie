@@ -31,7 +31,10 @@ function createRocketNode(resources) {
 
     let attachmentNode = new CubeRenderSGNode();
 
+
+
     attachmentTransformationNode.append(attachmentNode);
+
     rightAttachmentRotationNode.append(attachmentTransformationNode);
     backAttachmentRotationNode.append(attachmentTransformationNode);
     leftAttachmentRotationNode.append(attachmentTransformationNode);
@@ -54,6 +57,24 @@ function createRocketNode(resources) {
     tipTextureNode.append(tipTransformationNode);
 
     rocketNode.append(tipMaterialNode);
+
+    // lights above tip
+    let lightNode = new LightSGNode([0, 0, 0]);
+    lightNode.uniform = "u_light2";
+    lightNode.diffuse = [1, 0, 0, 1];
+    lightNode.specular = [1, 0, 0, 1];
+
+    let lightBall = new MaterialSGNode(new RenderSGNode(makeSphere(0.1, 20, 20)));
+    lightBall.diffuse = [193/255, 38/255, 56/255, 1];
+
+    rocketNode.append(
+        new TransformationSGNode(tipTransformationMatrix,
+            new TransformationSGNode(mat4.multiply(mat4.create(), glm.translate(0, 0.95, 0), glm.scale(1, 0.5, 1)),
+                [ lightBall, lightNode ]
+            )
+        )
+    );
+
 
     return rocketNode;
 }
