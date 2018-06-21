@@ -22,7 +22,7 @@ function createRocketNode() {
     footTransformationMatrix = mat4.multiply(mat4.create(), footTransformationMatrix, glm.scale(0.6, 1, 0.3));
     let footTransformationNode = new TransformationSGNode(footTransformationMatrix);
 
-    let footNode = new RenderSGNode();
+    let footNode = new CubeRenderSGNode();
 
     footTransformationNode.append(footNode);
     rightFootRotationNode.append(footTransformationNode);
