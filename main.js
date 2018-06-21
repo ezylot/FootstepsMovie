@@ -215,7 +215,7 @@ class Movie {
         this.cameraTarget[2] = this.cameraTarget[2] + MANUAL_CAMERA_SPEED / internalMultiplier *  viewVector[2];
     };
 
-    moveFurther() {
+    moveFurtherAway() {
         let viewVector = this.calculateViewVector();
         let internalMultiplier = 30;
 
@@ -280,7 +280,7 @@ loadResources({
             arrowUpInterval = setInterval(() => movie.moveCloser(), 10);
         }
         if(["arrowdown", "s"].includes(event.key.toLowerCase()) && arrowDownInterval == null) {
-            arrowDownInterval = setInterval(() => movie.moveFurther(), 10);
+            arrowDownInterval = setInterval(() => movie.moveFurtherAway(), 10);
         }
     });
 
