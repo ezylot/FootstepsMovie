@@ -1,6 +1,8 @@
 var gl = null;
 'use strict';
 
+
+
 // This is just for internal testing so we can skip ahead in time
 // For example if you set it to 10000 it will start with scene 2
 const TIME_OFFSET = 0;
@@ -41,6 +43,7 @@ class Movie {
         createHtmlText(this.canvas);
         this.shaderProgram = createProgram(this.gl, resources.defaultVS, resources.defaultFS);
         this.resetCamera();
+
         (function initFieldBackground(movie, resources) {
             let gl = movie.gl;
             movie.fieldSkyboxTexture = gl.createTexture();
@@ -146,7 +149,10 @@ class Movie {
                     })())
                 )
             );
+            //Setup smoke
 
+
+            //Setup podest
             let podest = new MaterialSGNode(
                 new EnabledTextureSGNode(
                     resources.asphaltImage,
