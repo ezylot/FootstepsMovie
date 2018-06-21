@@ -1,3 +1,4 @@
+var gl = null;
 'use strict';
 
 // This is just for internal testing so we can skip ahead in time
@@ -13,6 +14,7 @@ class Movie {
     constructor() {
         this.canvas = document.querySelector('#movieCanvas');
         this.gl = this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl');
+        gl = this.gl;
         this.shaderProgram = null;
 
         this.cameraPosition = null;
@@ -25,13 +27,8 @@ class Movie {
 
         this.fieldOfViewInRadians = convertDegreeToRadians(45);
 
-        this.rocketNode = null;
-        this.scene1rocketTransformationNode = null;
-        this.scene2rocketTransformationNode = null;
-        this.scene3moonTransformationNode = null;
-        this.scene3cockpitOverlayTransformationNode = null;
-
-        this.scene2CubeTexture = null;
+        this.universumSkyboxTexture = null;
+        this.universumSkyboxNode = null;
     }
 
     init(resources) {
@@ -39,19 +36,12 @@ class Movie {
         this.shaderProgram = createProgram(this.gl, resources.defaultVS, resources.defaultFS);
         this.resetCamera();
 
-        // Setup rocket
-        (function rocket(movie) {
-            // Setup rocket object
-            movie.rocketNode = createRocketNode(movie.gl);
-        })(this);
-
-        // Setup background for scene 2 and 3
-        (function initBackground(movie, resources) {
+        (function initUniversumBackground(movie, resources) {
             let gl = movie.gl;
-            movie.scene2CubeTexture = gl.createTexture();
+            movie.universumSkyboxTexture = gl.createTexture();
 
             gl.activeTexture(gl.TEXTURE0);
-            gl.bindTexture(gl.TEXTURE_CUBE_MAP, movie.scene2CubeTexture);
+            gl.bindTexture(gl.TEXTURE_CUBE_MAP, movie.universumSkyboxTexture);
 
             gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT);
             gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
@@ -60,105 +50,54 @@ class Movie {
             gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
             gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.env_pos_x);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.env_neg_x);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.env_pos_y);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.env_neg_y);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.env_pos_z);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.env_neg_z);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.universum_env_pos_x);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.universum_env_neg_x);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.universum_env_pos_y);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.universum_env_neg_y);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.universum_env_pos_z);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.universum_env_neg_z);
 
             gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
+
+            let environmentBoxNode = new EnvironmentSGNode(movie.universumSkyboxTexture, 4, false, new RenderSGNode(makeSphere(50)));
+            let shaderNode = new ShaderSGNode(createProgram(movie.gl, resources.envVS,  resources.envFS));
+            shaderNode.append(environmentBoxNode);
+
+            movie.universumSkyboxNode = shaderNode;
         })(this, resources);
 
-        // Setup scene 1
-        (function scene1(movie) {
-            // Set up the green floor
-            let floorTransformationMatrix = mat4.create();
-            floorTransformationMatrix = mat4.multiply(mat4.create(), floorTransformationMatrix, glm.scale(20, 0, 20));
-            floorTransformationMatrix = mat4.multiply(mat4.create(), floorTransformationMatrix, glm.rotateX(90));
 
-            let floorTransformationNode = new TransformationSGNode(floorTransformationMatrix);
-            movie.scene1.append(floorTransformationNode);
-
-            let floorNode = createFloorNode(movie.gl);
-            floorTransformationNode.append(floorNode);
-
-            // Setup pedestal of rocket
-            let pedestalTransformationMatrix = mat4.create();
-            pedestalTransformationMatrix = mat4.multiply(mat4.create(), pedestalTransformationMatrix, glm.scale(4, 0.2, 4));
-            let pedestalTransformationNode = new TransformationSGNode(pedestalTransformationMatrix);
-
-            let pedestalNode = getPedestal(movie.gl);
-            pedestalTransformationNode.append(pedestalNode);
-            movie.scene1.append(pedestalTransformationNode);
-
-            // Setup rocket
-            let rocketTransformationMatrix = mat4.create();
-            rocketTransformationMatrix = mat4.multiply(mat4.create(), rocketTransformationMatrix, glm.translate(0, 0.201, 0));
-            movie.scene1rocketTransformationNode = new TransformationSGNode(rocketTransformationMatrix);
-
-            movie.scene1rocketTransformationNode.append(movie.rocketNode);
-            movie.scene1.append(movie.scene1rocketTransformationNode);
+        (function initSun(movie){
+            let lightNode = new LightSGNode([0, 5, 5]);
+            lightNode.ambient = [0, 0, 0, 1];
+            lightNode.diffuse = [1, 1, 1, 1];
+            lightNode.specular = [1, 1, 1, 1];
+            movie.scene1.append(lightNode);
+            movie.scene2.append(lightNode);
+            movie.scene3.append(lightNode);
         })(this);
 
-        // Setup scene 2
-        (function scene2(movie) {
-            let skybox = new EnvironmentSGNode(movie.scene2CubeTexture, 4, false, new RenderSGNode(makeSphere(50)));
-            let shaderNode = new ShaderSGNode(createProgram(movie.gl, resources.envVS,  resources.envFS));
-            shaderNode.append(skybox);
-            movie.scene2.append(shaderNode);
+        (function initScene1(movie) {
+            let rocket = new MaterialSGNode(
+                new EnabledTextureSGNode(
+                    resources.universum_env_pos_x,
+                    new CubeRenderSGNode()
+                )
+            );
 
-            //Set up the earth
-            /*let earthTransformationMatrix = mat4.create();
-            earthTransformationMatrix = mat4.multiply(mat4.create(), earthTransformationMatrix, glm.scale(-6,1,-1));
-            earthTransformationMatrix = mat4.multiply(mat4.create(), earthTransformationMatrix, glm.rotateX(90));
-            let earthTransformationNode = new TransformationSGNode(earthTransformationMatrix);
-            movie.scene2.append(earthTransformationNode);
-
-            let earthNode = createEarthNode(movie.gl);
-            earthTransformationNode.append(earthNode);*/
-
-            let rocketTransformationMatrix = mat4.create();
-            rocketTransformationMatrix = mat4.multiply(mat4.create(),rocketTransformationMatrix,glm.translate(-5.5,1,-1))
-            rocketTransformationMatrix = mat4.multiply(mat4.create(), rocketTransformationMatrix, glm.rotateY(-20));
-            rocketTransformationMatrix = mat4.multiply(mat4.create(), rocketTransformationMatrix, glm.rotateZ(280));
-            movie.scene2rocketTransformationNode = new TransformationSGNode(rocketTransformationMatrix);
-
-            // Add rocket to scene
-            movie.scene2.append(movie.scene2rocketTransformationNode);
-            movie.scene2rocketTransformationNode.append(movie.rocketNode);
+            movie.scene1.append(rocket);
 
         })(this);
 
-        // Setup scene 3
-        (function scene3(movie) {
-            let skybox = new EnvironmentSGNode(movie.scene2CubeTexture, 4, false, new RenderSGNode(makeSphere(50)));
-            let shaderNode = new ShaderSGNode(createProgram(movie.gl, resources.envVS,  resources.envFS));
-            shaderNode.append(skybox);
-            movie.scene3.append(shaderNode);
+        (function initScene2(movie) {
+            movie.scene2.append(movie.universumSkyboxNode);
 
-            let moonNode = createMoon(movie.gl);
-
-            let moonTransformationMatrix = mat4.create();
-            moonTransformationMatrix = mat4.multiply(mat4.create(), moonTransformationMatrix,glm.translate(0,-7,-6));
-            movie.scene3moonTransformationNode = new TransformationSGNode(moonTransformationMatrix);
-            movie.scene3moonTransformationNode.append(moonNode);
-
-            movie.scene3.append(movie.scene3moonTransformationNode);
-
-            movie.scene3cockpitOverlayTransformationNode = new TransformationSGNode(mat4.identity(mat4.create()));
-
-            let cockpitScaleMatrix = glm.scale(3, 3, 1);
-            let cockpitScaleNode = new TransformationSGNode(cockpitScaleMatrix);
-            cockpitScaleNode.append(createCockpitOverlay(movie.gl));
-
-            movie.scene3cockpitOverlayTransformationNode.append(cockpitScaleNode);
-            movie.scene3.append(movie.scene3cockpitOverlayTransformationNode);
-
-
-            // movie.scene3.append(.....)
-            // movie.scene3.append(movie.rocketNode)
         })(this);
+
+        (function initScene3(movie) {
+            movie.scene3.append(movie.universumSkyboxNode);
+        })(this);
+
     };
 
     render(timeInMilliseconds) {
@@ -180,17 +119,6 @@ class Movie {
                 displayText("Scene 1");
             }
 
-            // Animation of scene 1
-            if(timeInMilliseconds > 2000) {
-                let rocketTransMatrix = this.scene1rocketTransformationNode.matrix;
-                let thrust = (timeInMilliseconds / 1000000) * Math.exp((timeInMilliseconds - 2000) / 3000);
-                rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.translate(0, thrust, 0));
-                if(timeInMilliseconds > 2500) {
-                    rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.rotateY(0.1));
-                }
-                this.scene1rocketTransformationNode.matrix = rocketTransMatrix;
-            }
-
         } else if(timeInMilliseconds < 20000) {
             // Black background for outer space
             this.gl.clearColor(0,0,0,1);
@@ -202,12 +130,6 @@ class Movie {
                 displayText("Scene 2");
             }
 
-            // Animation of scene 2
-                let rocketTransMatrix = this.scene2rocketTransformationNode.matrix;
-                let thrust = (timeInMilliseconds / 1000500) * Math.exp((timeInMilliseconds / 50000));
-                rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.translate(0, thrust, 0));
-                rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.rotateY(0.01));
-                this.scene2rocketTransformationNode.matrix = rocketTransMatrix;
         } else {
             // Black background for outer space
             this.gl.clearColor(0,0,0,1);
@@ -218,23 +140,6 @@ class Movie {
                 this.resetCamera();
                 displayText("Scene 3");
             }
-
-
-            // Keep overlay in front of camera
-
-            let translateMatrix = glm.translate(
-                this.cameraPosition[0] + (this.cameraTarget[0] - this.cameraPosition[0]),
-                this.cameraPosition[1] + (this.cameraTarget[1] - this.cameraPosition[1]),
-                this.cameraPosition[2] + (this.cameraTarget[2] - this.cameraPosition[2]),
-            );
-
-            let rotateMatrix = glm.rotateX(0);
-            rotateMatrix = mat4.multiply(mat4.create(), rotateMatrix, glm.rotateY(0));
-            rotateMatrix = mat4.multiply(mat4.create(), rotateMatrix, glm.rotateZ(0));
-
-            this.scene3cockpitOverlayTransformationNode.matrix = mat4.multiply(mat4.create(), translateMatrix, rotateMatrix);
-
-            // Animation of scene 3
         }
 
         this.rootNode.render(this.createSceneGraphContext(this.gl, this.shaderProgram));
@@ -316,17 +221,17 @@ class Movie {
 }
 
 loadResources({
-    defaultVS: 'shaders/simple.vs.glsl',
-    defaultFS: 'shaders/simple.fs.glsl',
+    defaultVS: 'shaders/master.vs.glsl',
+    defaultFS: 'shaders/master.fs.glsl',
     envVS: 'shaders/envmap.vs.glsl',
     envFS: 'shaders/envmap.fs.glsl',
 
-    env_pos_x: 'textures/skybox/Galaxy_RT.jpg',
-    env_neg_x: 'textures/skybox/Galaxy_LT.jpg',
-    env_pos_y: 'textures/skybox/Galaxy_DN.jpg',
-    env_neg_y: 'textures/skybox/Galaxy_UP.jpg',
-    env_pos_z: 'textures/skybox/Galaxy_FT.jpg',
-    env_neg_z: 'textures/skybox/Galaxy_BK.jpg'
+    universum_env_pos_x: 'textures/skybox/Galaxy_RT.jpg',
+    universum_env_neg_x: 'textures/skybox/Galaxy_LT.jpg',
+    universum_env_pos_y: 'textures/skybox/Galaxy_DN.jpg',
+    universum_env_neg_y: 'textures/skybox/Galaxy_UP.jpg',
+    universum_env_pos_z: 'textures/skybox/Galaxy_FT.jpg',
+    universum_env_neg_z: 'textures/skybox/Galaxy_BK.jpg'
 }).then(resources => {
     let movie = new Movie();
     movie.init(resources);
