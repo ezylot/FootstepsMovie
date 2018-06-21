@@ -197,9 +197,6 @@ class Movie {
             }
 
         } else if(timeInMilliseconds < 20000) {
-            // Black background for outer space
-            this.gl.clearColor(0,0,0,1);
-            this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
             if(this.rootNode !== this.scene2) {
                 this.rootNode = this.scene2;
