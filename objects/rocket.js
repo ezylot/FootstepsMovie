@@ -1,5 +1,10 @@
-function createRocketNode() {
+function createRocketNode(resources) {
     let rocketNode = new SGNode();
+
+    let rocketMaterialNode =  new MaterialSGNode();
+    let rocketIronTextureNode = new EnabledTextureSGNode(resources.ironImage);
+    rocketMaterialNode.append(rocketIronTextureNode);
+    rocketNode.append(rocketMaterialNode);
 
     // Body of rocket
     let bodyTransformationMatrix = mat4.create();
@@ -10,10 +15,10 @@ function createRocketNode() {
     let bodyNode = new CubeRenderSGNode();
     bodyTransformationNode.append(bodyNode);
 
-    rocketNode.append(bodyTransformationNode);
+    rocketIronTextureNode.append(bodyTransformationNode);
 
 
-    // Feets
+    // attachments
     let rightAttachmentRotationNode = new TransformationSGNode(glm.rotateY(0));
     let backAttachmentRotationNode = new TransformationSGNode(glm.rotateY(90));
     let leftAttachmentRotationNode = new TransformationSGNode(glm.rotateY(180));
@@ -32,17 +37,23 @@ function createRocketNode() {
     leftAttachmentRotationNode.append(attachmentTransformationNode);
     frontAttachmentRotationNode.append(attachmentTransformationNode);
 
-    rocketNode.append(rightAttachmentRotationNode);
-    rocketNode.append(backAttachmentRotationNode);
-    rocketNode.append(leftAttachmentRotationNode);
-    rocketNode.append(frontAttachmentRotationNode);
+    rocketIronTextureNode.append(rightAttachmentRotationNode);
+    rocketIronTextureNode.append(backAttachmentRotationNode);
+    rocketIronTextureNode.append(leftAttachmentRotationNode);
+    rocketIronTextureNode.append(frontAttachmentRotationNode);
 
     // Tip of rocket
-    let tipTransformationMatrix = mat4.create();
+    let tipTransformationMatrix = bodyTransformationMatrix;
     tipTransformationMatrix = mat4.multiply(mat4.create(), tipTransformationMatrix, glm.translate(0, 2, 0));
     let tipTransformationNode = new TransformationSGNode(tipTransformationMatrix);
     tipTransformationNode.append(new PyramidRenderSGNode());
-    bodyTransformationNode.append(tipTransformationNode);
+
+    let tipMaterialNode =  new MaterialSGNode();
+    let tipTextureNode = new EnabledTextureSGNode(resources.tipImage);
+    tipMaterialNode.append(tipTextureNode);
+    tipTextureNode.append(tipTransformationNode);
+
+    rocketNode.append(tipMaterialNode);
 
     return rocketNode;
 }

@@ -91,12 +91,7 @@ class Movie {
 
         (function initScene1(movie) {
             // Setup rocket
-            let rocket = new MaterialSGNode(
-                new EnabledTextureSGNode(
-                    resources.universum_env_pos_x,
-                    createRocketNode()
-                )
-            );
+            let rocket = createRocketNode(resources);
 
             movie.scene1.append(rocket);
 
@@ -253,6 +248,8 @@ loadResources({
     simpleLightFS: 'shaders/simpleLight.fs.glsl',
 
     grassImage: 'textures/grass.jpg',
+    ironImage: 'textures/iron.jpg',
+    tipImage: 'textures/rocketTip.jpg',
 
     universum_env_pos_x: 'textures/skybox/Galaxy_RT.jpg',
     universum_env_neg_x: 'textures/skybox/Galaxy_LT.jpg',
