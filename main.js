@@ -29,6 +29,9 @@ class Movie {
 
         this.universumSkyboxTexture = null;
         this.universumSkyboxNode = null;
+
+        this.rocketNode = null;
+        this.rocketTransformationMatrix = null;
     }
 
     init(resources) {
@@ -89,13 +92,16 @@ class Movie {
             movie.scene3.append(lightNode);
         })(this);
 
+        (function initRocket(movie){
+            movie.rocketTransformationMatrix = glm.translate(0,0,0);
+            movie.rocketNode = new TransformationSGNode(movie.rocketTransformationMatrix, [
+                createRocketNode(resources)
+            ]);
+        })(this);
+
         (function initScene1(movie) {
             // Setup rocket
-            let rocket = createRocketNode(resources);
-
-            movie.scene1.append(new TransformationSGNode(glm.transform({ translate: [0,0.0,0] }), [
-                rocket
-            ]));
+            movie.scene1.append(movie.rocketNode);
 
             let floor = new MaterialSGNode(
                 new EnabledTextureSGNode(
@@ -129,7 +135,7 @@ class Movie {
 
         (function initScene2(movie) {
             movie.scene2.append(movie.universumSkyboxNode);
-
+            movie.scene2.append(movie.rocketNode);
         })(this);
 
         (function initScene3(movie) {
