@@ -93,16 +93,35 @@ class Movie {
             // Setup rocket
             let rocket = createRocketNode(resources);
 
-            movie.scene1.append(rocket);
+            movie.scene1.append(new TransformationSGNode(glm.transform({ translate: [0,0.0,0] }), [
+                rocket
+            ]));
 
             let floor = new MaterialSGNode(
                 new EnabledTextureSGNode(
                     resources.grassImage,
-                    new RenderSGNode(makeRect(2, 2))
+                    new RenderSGNode((() => {
+                        let rect = makeRect(2, 2);
+                        let repeats = 40;
+                        rect.texture = [0, 0, repeats, 0, repeats, repeats, 0, repeats];
+                        return rect;
+                    })())
                 )
             );
 
-            movie.scene1.append(new TransformationSGNode(glm.transform({ translate: [0,-1.5,0], rotateX: -90, scale: 3}), [
+            let podest = new MaterialSGNode(
+                new EnabledTextureSGNode(
+                    resources.asphaltImage,
+                    new CubeRenderSGNode()
+                )
+            );
+
+            var podestTransformationMatrix = mat4.multiply(mat4.create(), glm.scale(8,0.2,8), glm.translate(0, -7.5, 0));
+            movie.scene1.append(new TransformationSGNode(podestTransformationMatrix, [
+                podest
+            ]));
+
+            movie.scene1.append(new TransformationSGNode(glm.transform({ translate: [0,-1.5,0], rotateX: -90, scale: 100}), [
                 floor
             ]));
 
@@ -188,8 +207,8 @@ class Movie {
     /********** Camera movement *********/
 
     resetCamera() {
-        this.cameraPosition = vec3.fromValues(1, 3, 8)
-        this.cameraTarget = vec3.fromValues(0, 2, 0)
+        this.cameraPosition = vec3.fromValues(1, 5, 15);
+        this.cameraTarget = vec3.fromValues(0, 2, 0);
     };
 
     turnCamera(x, y) {
@@ -250,13 +269,14 @@ loadResources({
     grassImage: 'textures/grass.jpg',
     ironImage: 'textures/iron.jpg',
     tipImage: 'textures/rocketTip.jpg',
+    asphaltImage: 'textures/asphalt.png',
 
-    universum_env_pos_x: 'textures/skybox/Galaxy_RT.jpg',
-    universum_env_neg_x: 'textures/skybox/Galaxy_LT.jpg',
-    universum_env_pos_y: 'textures/skybox/Galaxy_DN.jpg',
-    universum_env_neg_y: 'textures/skybox/Galaxy_UP.jpg',
-    universum_env_pos_z: 'textures/skybox/Galaxy_FT.jpg',
-    universum_env_neg_z: 'textures/skybox/Galaxy_BK.jpg'
+    universum_env_pos_x: 'textures/skybox/Galaxy_RT.png',
+    universum_env_neg_x: 'textures/skybox/Galaxy_LT.png',
+    universum_env_pos_y: 'textures/skybox/Galaxy_DN.png',
+    universum_env_neg_y: 'textures/skybox/Galaxy_UP.png',
+    universum_env_pos_z: 'textures/skybox/Galaxy_FT.png',
+    universum_env_neg_z: 'textures/skybox/Galaxy_BK.png'
 }).then(resources => {
     let movie = new Movie();
     movie.init(resources);
