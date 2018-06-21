@@ -32,6 +32,9 @@ varying vec3 v_lightVec;
 varying vec3 v_light2Vec;
 varying vec3 v_spotlight;
 
+uniform bool u_enableAlphaOverride;
+uniform float u_alpha;
+
 //texture related variables
 uniform bool u_enableObjectTexture;
 uniform bool u_enableLight2;
@@ -87,5 +90,9 @@ void main (void) {
                 );
             }
         }
+    }
+
+    if(u_enableAlphaOverride) {
+        gl_FragColor.a = u_alpha;
     }
 }
