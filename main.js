@@ -129,9 +129,12 @@ class Movie {
 
         (function initRocket(movie){
             let rocketTransformationMatrix = glm.translate(0,0.1,0);
+            var rocket = createRocketNode(movie, resources, movie.fieldSkyboxTexture)
             movie.rocketNode = new TransformationSGNode(rocketTransformationMatrix, [
-                createRocketNode(resources)
+                rocket
             ]);
+
+            movie.rocketNode.setSkyboxTexture = rocket.setSkyboxTexture;
         })(this);
 
         (function initScene1(movie) {
@@ -238,6 +241,8 @@ class Movie {
                 this.rootNode = enableLight2Node;
                 this.resetCamera();
                 displayText("Scene 2");
+
+                this.rocketNode.setSkyboxTexture(this.universumSkyboxTexture);
 
                 let rocketTransformationMatrix = mat4.create();
                 rocketTransformationMatrix = mat4.multiply(mat4.create(),rocketTransformationMatrix,glm.translate(-5.5,1,-1))

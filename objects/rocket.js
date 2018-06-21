@@ -1,5 +1,9 @@
-function createRocketNode(resources) {
+function createRocketNode(movie, resources, sb) {
     let rocketNode = new SGNode();
+
+    rocketNode.setSkyboxTexture = function(tex) {
+        skyboxReflectionNode.envtexture = tex;
+    };
 
     let rocketMaterialNode =  new MaterialSGNode();
     let rocketIronTextureNode = new EnabledTextureSGNode(resources.ironImage);
@@ -17,6 +21,16 @@ function createRocketNode(resources) {
 
     rocketIronTextureNode.append(bodyTransformationNode);
 
+    // mirror window
+
+    var skyboxReflectionNode = new EnvironmentSGNode(sb, 4, true, new CubeRenderSGNode())
+    let mirrorWindowTransformationNode = new TransformationSGNode(
+        mat4.multiply(mat4.create(), glm.translate(0, 1.8, 1), glm.scale(0.4, 0.4, 0.1)),
+        new ShaderSGNode(createProgram(movie.gl, resources.envVS,  resources.envFS),
+            skyboxReflectionNode
+        )
+    );
+    rocketNode.append(mirrorWindowTransformationNode);
 
     // attachments
     let rightAttachmentRotationNode = new TransformationSGNode(glm.rotateY(0));
@@ -30,8 +44,6 @@ function createRocketNode(resources) {
     let attachmentTransformationNode = new TransformationSGNode(attachmentTransformationMatrix);
 
     let attachmentNode = new CubeRenderSGNode();
-
-
 
     attachmentTransformationNode.append(attachmentNode);
 
