@@ -68,16 +68,29 @@ class Movie {
 
 
         (function initSun(movie){
-            let lightNode = new LightSGNode([0, 5, 5]);
-            lightNode.ambient = [0, 0, 0, 1];
-            lightNode.diffuse = [1, 1, 1, 1];
-            lightNode.specular = [1, 1, 1, 1];
+            let lightNode = new SGNode();
+            let lightTranslationNode = new TransformationSGNode(glm.translate(-2, 30, 30));
+            lightNode.append(lightTranslationNode);
+
+            let lightSourceNode = new LightSGNode([0, 0, 0]);
+            lightSourceNode.ambient = [0, 0, 0, 1];
+            lightSourceNode.diffuse = [1, 1, 1, 1];
+            lightSourceNode.specular = [1, 1, 1, 1];
+
+            let lightBallNode = new ShaderSGNode(createProgram(gl, resources.simpleLightVS, resources.simpleLightFS), [
+                new RenderSGNode(makeSphere(.1,10,10))
+            ]);
+
+            lightTranslationNode.append(lightBallNode);
+            lightTranslationNode.append(lightSourceNode);
+
             movie.scene1.append(lightNode);
             movie.scene2.append(lightNode);
             movie.scene3.append(lightNode);
         })(this);
 
         (function initScene1(movie) {
+            // Setup rocket
             let rocket = new MaterialSGNode(
                 new EnabledTextureSGNode(
                     resources.universum_env_pos_x,
@@ -86,6 +99,17 @@ class Movie {
             );
 
             movie.scene1.append(rocket);
+
+            let floor = new MaterialSGNode(
+                new EnabledTextureSGNode(
+                    resources.grassImage,
+                    new RenderSGNode(makeRect(2, 2))
+                )
+            );
+
+            movie.scene1.append(new TransformationSGNode(glm.transform({ translate: [0,-1.5,0], rotateX: -90, scale: 3}), [
+                floor
+            ]));
 
         })(this);
 
@@ -225,6 +249,10 @@ loadResources({
     defaultFS: 'shaders/master.fs.glsl',
     envVS: 'shaders/envmap.vs.glsl',
     envFS: 'shaders/envmap.fs.glsl',
+    simpleLightVS: 'shaders/simpleLight.vs.glsl',
+    simpleLightFS: 'shaders/simpleLight.fs.glsl',
+
+    grassImage: 'textures/grass.jpg',
 
     universum_env_pos_x: 'textures/skybox/Galaxy_RT.jpg',
     universum_env_neg_x: 'textures/skybox/Galaxy_LT.jpg',
