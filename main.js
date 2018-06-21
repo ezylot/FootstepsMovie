@@ -29,12 +29,43 @@ class Movie {
 
         this.universumSkyboxTexture = null;
         this.universumSkyboxNode = null;
+        this.fieldSkyboxTexture = null;
+        this.fieldSkyboxNode = null;
     }
 
     init(resources) {
         createHtmlText(this.canvas);
         this.shaderProgram = createProgram(this.gl, resources.defaultVS, resources.defaultFS);
         this.resetCamera();
+        (function initFieldBackground(movie, resources) {
+            let gl = movie.gl;
+            movie.fieldSkyboxTexture = gl.createTexture();
+
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_CUBE_MAP, movie.fieldSkyboxTexture);
+
+            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.MIRRORED_REPEAT);
+            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.MIRRORED_REPEAT);
+
+            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.field_env_pos_x);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.field_env_neg_x);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.field_env_pos_y);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.field_env_neg_y);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.field_env_pos_z);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.field_env_neg_z);
+
+            gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
+
+            let environmentBoxNode = new EnvironmentSGNode(movie.fieldSkyboxTexture, 4, false, new RenderSGNode(makeSphere(50)));
+            let shaderNode = new ShaderSGNode(createProgram(movie.gl, resources.envVS,  resources.envFS));
+            shaderNode.append(environmentBoxNode);
+
+            movie.fieldSkyboxNode = shaderNode;
+        })(this, resources);
 
         (function initUniversumBackground(movie, resources) {
             let gl = movie.gl;
@@ -52,8 +83,8 @@ class Movie {
             gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
             gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.universum_env_pos_x);
             gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.universum_env_neg_x);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.universum_env_pos_y);
-            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.universum_env_neg_y);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.universum_env_pos_y);
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.universum_env_neg_y);
             gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.universum_env_pos_z);
             gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, resources.universum_env_neg_z);
 
@@ -90,6 +121,8 @@ class Movie {
         })(this);
 
         (function initScene1(movie) {
+            //Setup skybox
+           // movie.scene2.append(movie.fieldSkyboxNode);
             // Setup rocket
             let rocket = createRocketNode(resources);
 
@@ -97,14 +130,14 @@ class Movie {
 
             let floor = new MaterialSGNode(
                 new EnabledTextureSGNode(
-                    resources.grassImage,
+                    resources.ashaltImage,
                     new RenderSGNode(makeRect(2, 2))
                 )
             );
 
-            movie.scene1.append(new TransformationSGNode(glm.transform({ translate: [0,-1.5,0], rotateX: -90, scale: 3}), [
+            movie.scene1.append(movie.fieldSkyboxNode), [
                 floor
-            ]));
+            ];
 
         })(this);
 
@@ -247,16 +280,24 @@ loadResources({
     simpleLightVS: 'shaders/simpleLight.vs.glsl',
     simpleLightFS: 'shaders/simpleLight.fs.glsl',
 
+    ashaltImage: 'textures/asphalt.png',
     grassImage: 'textures/grass.jpg',
     ironImage: 'textures/iron.jpg',
     tipImage: 'textures/rocketTip.jpg',
 
-    universum_env_pos_x: 'textures/skybox/Galaxy_RT.jpg',
-    universum_env_neg_x: 'textures/skybox/Galaxy_LT.jpg',
-    universum_env_pos_y: 'textures/skybox/Galaxy_DN.jpg',
-    universum_env_neg_y: 'textures/skybox/Galaxy_UP.jpg',
-    universum_env_pos_z: 'textures/skybox/Galaxy_FT.jpg',
-    universum_env_neg_z: 'textures/skybox/Galaxy_BK.jpg'
+    field_env_pos_x: 'textures/skybox_scene1/posx.jpg',
+    field_env_neg_x: 'textures/skybox_scene1/negx.jpg',
+    field_env_pos_y: 'textures/skybox_scene1/posy.jpg',
+    field_env_neg_y: 'textures/skybox_scene1/negy.jpg',
+    field_env_pos_z: 'textures/skybox_scene1/posz.jpg',
+    field_env_neg_z: 'textures/skybox_scene1/negz.jpg',
+
+    universum_env_pos_x: 'textures/skybox/Galaxy_RT.png',
+    universum_env_neg_x: 'textures/skybox/Galaxy_LT.png',
+    universum_env_pos_y: 'textures/skybox/Galaxy_DN.png',
+    universum_env_neg_y: 'textures/skybox/Galaxy_UP.png',
+    universum_env_pos_z: 'textures/skybox/Galaxy_FT.png',
+    universum_env_neg_z: 'textures/skybox/Galaxy_BK.png'
 }).then(resources => {
     let movie = new Movie();
     movie.init(resources);
