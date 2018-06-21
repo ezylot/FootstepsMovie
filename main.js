@@ -33,7 +33,7 @@ class Movie {
         this.fieldSkyboxNode = null;
 
         this.rocketNode = null;
-        this.rocketTransformationMatrix = null;
+        this.lightTranslationNode = null;
     }
 
     init(resources) {
@@ -103,20 +103,20 @@ class Movie {
 
         (function initSun(movie){
             let lightNode = new SGNode();
-            let lightTranslationNode = new TransformationSGNode(glm.translate(-2, 30, 30));
-            lightNode.append(lightTranslationNode);
+            movie.lightTranslationNode = new TransformationSGNode(glm.translate(-2, 20, 20));
+            lightNode.append(movie.lightTranslationNode);
 
             let lightSourceNode = new LightSGNode([0, 0, 0]);
-            lightSourceNode.ambient = [0, 0, 0, 1];
+            lightSourceNode.ambient = [0.05, 0.05, 0.05, 1];
             lightSourceNode.diffuse = [1, 1, 1, 1];
             lightSourceNode.specular = [1, 1, 1, 1];
 
             let lightBallNode = new ShaderSGNode(createProgram(gl, resources.simpleLightVS, resources.simpleLightFS), [
-                new RenderSGNode(makeSphere(.1,10,10))
+                new RenderSGNode(makeSphere(.8,10,10))
             ]);
 
-            lightTranslationNode.append(lightBallNode);
-            lightTranslationNode.append(lightSourceNode);
+            movie.lightTranslationNode.append(lightBallNode);
+            movie.lightTranslationNode.append(lightSourceNode);
 
             movie.scene1.append(lightNode);
             movie.scene2.append(lightNode);
@@ -124,8 +124,8 @@ class Movie {
         })(this);
 
         (function initRocket(movie){
-            movie.rocketTransformationMatrix = glm.translate(0,0,0);
-            movie.rocketNode = new TransformationSGNode(movie.rocketTransformationMatrix, [
+            let rocketTransformationMatrix = glm.translate(0,0.1,0);
+            movie.rocketNode = new TransformationSGNode(rocketTransformationMatrix, [
                 createRocketNode(resources)
             ]);
         })(this);
@@ -185,7 +185,6 @@ class Movie {
 
         this.gl.useProgram(this.shaderProgram);
 
-        //console.log(timeInMilliseconds);
         if(timeInMilliseconds < 10000) {
             this.gl.clearColor(0.247, 0.647, 1, 1.0);
             this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
@@ -194,6 +193,18 @@ class Movie {
                 this.rootNode = this.scene1;
                 this.resetCamera();
                 displayText("Scene 1");
+
+            }
+
+            // Animation of scene 1
+            if(timeInMilliseconds > 2000) {
+                let rocketTransMatrix = this.rocketNode.matrix;
+                let thrust = (timeInMilliseconds / 1000000) * Math.exp((timeInMilliseconds - 2000) / 3000);
+                rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.translate(0, thrust, 0));
+                if(timeInMilliseconds > 2500) {
+                    rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.rotateY(0.1));
+                }
+                this.rocketNode.matrix = rocketTransMatrix;
             }
 
         } else if(timeInMilliseconds < 20000) {
@@ -202,8 +213,22 @@ class Movie {
                 this.rootNode = this.scene2;
                 this.resetCamera();
                 displayText("Scene 2");
+
+                let rocketTransformationMatrix = mat4.create();
+                rocketTransformationMatrix = mat4.multiply(mat4.create(),rocketTransformationMatrix,glm.translate(-5.5,1,-1))
+                rocketTransformationMatrix = mat4.multiply(mat4.create(), rocketTransformationMatrix, glm.rotateY(-20));
+                rocketTransformationMatrix = mat4.multiply(mat4.create(), rocketTransformationMatrix, glm.rotateZ(280));
+                this.rocketNode.matrix = rocketTransformationMatrix;
+
+                this.lightTranslationNode.matrix = glm.translate(-2, 20, -10)
             }
 
+            // Animation of scene 2
+            let rocketTransMatrix = this.rocketNode.matrix;
+            let thrust = (timeInMilliseconds / 1000500) * Math.exp((timeInMilliseconds / 50000));
+            rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.translate(0, thrust, 0));
+            rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.rotateY(0.01));
+            this.rocketNode.matrix = rocketTransMatrix;
         } else {
             // Black background for outer space
             this.gl.clearColor(0,0,0,1);
@@ -213,6 +238,7 @@ class Movie {
                 this.rootNode = this.scene3;
                 this.resetCamera();
                 displayText("Scene 3");
+                this.rocketNode.matrix = mat4.create();
             }
         }
 
