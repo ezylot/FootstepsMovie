@@ -81,7 +81,7 @@ class Movie {
             let rocket = new MaterialSGNode(
                 new EnabledTextureSGNode(
                     resources.universum_env_pos_x,
-                    new CubeRenderSGNode()
+                    createRocketNode()
                 )
             );
 
