@@ -160,12 +160,9 @@ class Movie {
 
             movie.scene1.append(new TransformationSGNode(glm.transform({ translate: [0,-1.5,0], rotateX: -90, scale: 100}), [
                 floor
-            ];
+            ]));
 
-            movie.scene1.append(movie.fieldSkyboxNode), [
-                floor
-            ];
-
+            movie.scene1.append(movie.fieldSkyboxNode);
 
         })(this);
 
