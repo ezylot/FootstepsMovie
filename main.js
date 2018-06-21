@@ -93,7 +93,7 @@ class Movie {
 
             gl.bindTexture(gl.TEXTURE_CUBE_MAP, null);
 
-            let environmentBoxNode = new EnvironmentSGNode(movie.universumSkyboxTexture, 4, false, new RenderSGNode(makeSphere(50)));
+            let environmentBoxNode = new EnvironmentSGNode(movie.universumSkyboxTexture, 4, false, new RenderSGNode(makeSphere(100)));
             let shaderNode = new ShaderSGNode(createProgram(movie.gl, resources.envVS,  resources.envFS));
             shaderNode.append(environmentBoxNode);
 
@@ -173,6 +173,15 @@ class Movie {
 
         (function initScene3(movie) {
             movie.scene3.append(movie.universumSkyboxNode);
+
+            let moon = new MaterialSGNode(
+                new EnabledTextureSGNode(
+                    resources.moonImage,
+                    new RenderSGNode(makeSphere(5, 100, 100))
+                )
+            );
+            movie.scene3.append(moon);
+
         })(this);
 
     };
@@ -239,6 +248,13 @@ class Movie {
                 this.resetCamera();
                 displayText("Scene 3");
                 this.rocketNode.matrix = mat4.create();
+                this.cameraPosition = vec3.fromValues(0, 5, 90);
+            }
+
+            if(timeInMilliseconds < 25000) {
+                this.moveCloser(20);
+            } else if(timeInMilliseconds < 30000) {
+                this.moveCloser(30);
             }
         }
 
@@ -247,7 +263,7 @@ class Movie {
     };
 
     createSceneGraphContext(gl, shader) {
-        let projectionMatrix = mat4.perspective(mat4.create(), this.fieldOfViewInRadians, this.canvas.width / this.canvas.height, 0.01, 100);
+        let projectionMatrix = mat4.perspective(mat4.create(), this.fieldOfViewInRadians, this.canvas.width / this.canvas.height, 0.01, 200);
         gl.uniformMatrix4fv(gl.getUniformLocation(shader, 'u_projection'), false, projectionMatrix);
 
         let eye = this.cameraPosition;
@@ -278,9 +294,9 @@ class Movie {
         this.cameraTarget[1] += y;
     };
 
-    moveCloser() {
+    moveCloser(internalMultiplier) {
         let viewVector = this.calculateViewVector();
-        let internalMultiplier = 30;
+        internalMultiplier = internalMultiplier || 30;
 
         this.cameraPosition[0] = this.cameraPosition[0] + MANUAL_CAMERA_SPEED / internalMultiplier * viewVector[0];
         this.cameraPosition[1] = this.cameraPosition[1] + MANUAL_CAMERA_SPEED / internalMultiplier * viewVector[1];
@@ -328,7 +344,7 @@ loadResources({
     simpleLightVS: 'shaders/simpleLight.vs.glsl',
     simpleLightFS: 'shaders/simpleLight.fs.glsl',
 
-    ashaltImage: 'textures/asphalt.png',
+    moonImage: 'textures/moon.png',
     grassImage: 'textures/grass.jpg',
     ironImage: 'textures/iron.jpg',
     tipImage: 'textures/rocketTip.jpg',
