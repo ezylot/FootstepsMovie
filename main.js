@@ -37,6 +37,8 @@ class Movie {
 
         this.rocketNode = null;
         this.lightTranslationNode = null;
+
+        this.counter = -1;
     }
 
     init(resources) {
@@ -135,6 +137,7 @@ class Movie {
             ]);
 
             movie.rocketNode.setSkyboxTexture = rocket.setSkyboxTexture;
+            movie.rocketNode.toggleLight = rocket.toggleLight;
         })(this);
 
         (function initScene1(movie) {
@@ -208,6 +211,14 @@ class Movie {
 
         this.gl.useProgram(this.shaderProgram);
 
+        let time = Math.floor(timeInMilliseconds / 700);
+
+        if(this.counter < time) {
+            console.log("toggle" + this.counter);
+            this.rocketNode.toggleLight();
+            this.counter = time;
+        }
+
         if(timeInMilliseconds < 10000) {
             this.gl.clearColor(0.247, 0.647, 1, 1.0);
             this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
@@ -217,7 +228,8 @@ class Movie {
                 this.sceneGraphRootNode = this.scene1;
                 enableLight2Node.append(this.sceneGraphRootNode);
                 this.rootNode = enableLight2Node;
-                this.resetCamera();
+                this.cameraPosition = vec3.fromValues(1, 2, 20);
+                this.cameraTarget = vec3.fromValues(0, 5, 0);
                 displayText("Scene 1");
             }
 

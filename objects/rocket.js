@@ -5,6 +5,18 @@ function createRocketNode(movie, resources, sb) {
         skyboxReflectionNode.envtexture = tex;
     };
 
+    rocketNode.toggleLight = function() {
+        if(lightNode.diffuse[0] === 1) {
+            lightNode.diffuse = [0, 0, 0, 1];
+            lightNode.specular = [0, 0, 0, 1];
+            lightBall.diffuse = [0, 0, 0, 1];
+        } else {
+            lightNode.diffuse = [1, 0, 0, 1];
+            lightNode.specular = [1, 0, 0, 1];
+            lightBall.diffuse = [193/255, 38/255, 56/255, 1];
+        }
+    };
+
     let rocketMaterialNode =  new MaterialSGNode();
     let rocketIronTextureNode = new EnabledTextureSGNode(resources.ironImage);
     rocketMaterialNode.append(rocketIronTextureNode);
@@ -71,12 +83,12 @@ function createRocketNode(movie, resources, sb) {
     rocketNode.append(tipMaterialNode);
 
     // lights above tip
-    let lightNode = new LightSGNode([0, 0, 0]);
+    var lightNode = new LightSGNode([0, 0, 0]);
     lightNode.uniform = "u_light2";
     lightNode.diffuse = [1, 0, 0, 1];
     lightNode.specular = [1, 0, 0, 1];
 
-    let lightBall = new MaterialSGNode(new RenderSGNode(makeSphere(0.1, 20, 20)));
+    var lightBall = new MaterialSGNode(new RenderSGNode(makeSphere(0.1, 20, 20)));
     lightBall.diffuse = [193/255, 38/255, 56/255, 1];
 
     rocketNode.append(
