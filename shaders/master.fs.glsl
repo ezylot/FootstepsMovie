@@ -18,6 +18,8 @@ struct Light {
 	vec4 ambient;
 	vec4 diffuse;
 	vec4 specular;
+	float degrees;
+	vec3 direction;
 };
 
 //illumination related variables
@@ -26,9 +28,11 @@ uniform Light u_light;
 varying vec3 v_normalVec;
 varying vec3 v_eyeVec;
 varying vec3 v_lightVec;
+varying vec3 v_spotlight;
 
 //texture related variables
 uniform bool u_enableObjectTexture;
+uniform bool u_enableSpotlight;
 varying vec2 v_texCoord;
 uniform sampler2D u_tex;
 
@@ -64,4 +68,18 @@ void main (void) {
     }
 
 	gl_FragColor = calculateSimplePointLight(u_light, u_material, v_lightVec, v_normalVec, v_eyeVec, textureColor);
+
+    if(u_enableSpotlight) {
+        vec3 spotlight = normalize(v_spotlight);
+        vec3 spotlightDirection = normalize(u_light.direction);
+
+        if(dot(spotlight, -spotlightDirection) > u_light.degrees) {
+            float intensity = dot(v_normalVec, spotlight);
+            if(intensity > 0.0) {
+                gl_FragColor += calculateSimplePointLight(
+                    u_light, u_material, v_lightVec, v_normalVec, v_eyeVec, textureColor
+                );
+            }
+        }
+    }
 }

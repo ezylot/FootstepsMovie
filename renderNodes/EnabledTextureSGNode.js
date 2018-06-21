@@ -6,6 +6,6 @@ class EnabledTextureSGNode extends AdvancedTextureSGNode {
     render(context) {
         gl.uniform1i(gl.getUniformLocation(context.shader, 'u_enableObjectTexture'), 1);
         super.render(context);
-        gl.uniform1i(gl.getUniformLocation(context.shader, 'u_enableObjectTexture'), 1);
+        gl.uniform1i(gl.getUniformLocation(context.shader, 'u_enableObjectTexture'), 0);
     }
 }

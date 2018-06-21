@@ -168,6 +168,10 @@ class Movie {
                 floor
             ]));
 
+            let spotLight = new SpotlightSGNode([0, 1, 1], [0, 0, 0], 30);
+
+            movie.scene1.append(spotLight);
+
             movie.scene1.append(movie.fieldSkyboxNode);
 
         })(this);
