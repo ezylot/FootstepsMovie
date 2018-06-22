@@ -7,5 +7,6 @@ class AlphaOverrideSGNode extends SetUniformSGNode {
     render(context) {
         gl.uniform1f(gl.getUniformLocation(context.shader, 'u_alpha'), this.newAlpha);
         super.render(context);
+        gl.uniform1f(gl.getUniformLocation(context.shader, 'u_alpha'), 1.0);
     }
 }

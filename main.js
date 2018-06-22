@@ -39,6 +39,8 @@ class Movie {
         this.lightTranslationNode = null;
 
         this.counter = -1;
+        this.smokeCounter = -1;
+        this.smokeParticles = [];
     }
 
     init(resources) {
@@ -216,7 +218,6 @@ class Movie {
         if(this.counter < time) {
             console.log("toggle" + this.counter);
             this.rocketNode.toggleLight();
-            this.counter = time;
         }
 
         if(timeInMilliseconds < 10000) {
@@ -233,15 +234,65 @@ class Movie {
                 displayText("Scene 1");
             }
 
+            var sgrn = this.sceneGraphRootNode;
+
+            this.smokeParticles.forEach(function(element) {
+                if(timeInMilliseconds - element.created > 5000) {
+                    sgrn.remove(element);
+                }
+
+                let rand = Math.random();
+
+                let displacementX = (rand - 0.5) * 0.07;
+                let displacementY = rand * 0.01;
+                let displacementZ = (rand - 0.5) * 0.07;
+
+                element.matrix = mat4.multiply(mat4.create(), element.matrix, glm.translate(displacementX, displacementY, displacementZ));
+            });
+
             // Animation of scene 1
-            if(timeInMilliseconds > 2000) {
+            if(timeInMilliseconds > 3000) {
+
                 let rocketTransMatrix = this.rocketNode.matrix;
-                let thrust = (timeInMilliseconds / 1000000) * Math.exp((timeInMilliseconds - 2000) / 3000);
+                let thrust = (timeInMilliseconds / 1000000) * Math.exp((timeInMilliseconds - 2000) / 2500);
                 rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.translate(0, thrust, 0));
-                if(timeInMilliseconds > 2500) {
+                if(timeInMilliseconds > 3500) {
                     rocketTransMatrix = mat4.multiply(mat4.create(), rocketTransMatrix, glm.rotateY(0.1));
                 }
                 this.rocketNode.matrix = rocketTransMatrix;
+            }
+
+            if(this.smokeCounter < Math.floor(timeInMilliseconds / 70)) {
+                this.smokeCounter = Math.floor(timeInMilliseconds / 70);
+                for(let i = 0; i < 8; i++) {
+                    let displacementX = Math.random();
+                    let displacementY = Math.random();
+                    let displacementZ = Math.random();
+
+                    if(timeInMilliseconds < 4600) {
+                        displacementX = displacementX * 4 - 2;
+                        displacementY = displacementY - 1.2;
+                        displacementZ = displacementZ * 4 -2;
+                    } else {
+                        displacementX = displacementX * 2 - 1;
+                        displacementY = displacementY - 1.6;
+                        displacementZ = displacementZ * 2 -1;
+                    }
+
+                    let particle = new TransformationSGNode(
+                        mat4.multiply(mat4.create(), this.rocketNode.matrix, glm.translate(displacementX, displacementY * 2, displacementZ)),
+                        new AlphaOverrideSGNode(0.25,
+                            new RenderSGNode(
+                                makeSphere(0.4, 20, 20)
+                            )
+                        )
+                    );
+
+                    particle.created = timeInMilliseconds;
+
+                    this.smokeParticles.push(particle);
+                    this.sceneGraphRootNode.append(particle);
+                }
             }
 
         } else if(timeInMilliseconds < 20000) {
@@ -257,7 +308,7 @@ class Movie {
                 this.rocketNode.setSkyboxTexture(this.universumSkyboxTexture);
 
                 let rocketTransformationMatrix = mat4.create();
-                rocketTransformationMatrix = mat4.multiply(mat4.create(),rocketTransformationMatrix,glm.translate(-5.5,1,-1))
+                rocketTransformationMatrix = mat4.multiply(mat4.create(),rocketTransformationMatrix,glm.translate(-5.5,1,-1));
                 rocketTransformationMatrix = mat4.multiply(mat4.create(), rocketTransformationMatrix, glm.rotateY(-20));
                 rocketTransformationMatrix = mat4.multiply(mat4.create(), rocketTransformationMatrix, glm.rotateZ(280));
                 this.rocketNode.matrix = rocketTransformationMatrix;
@@ -292,6 +343,10 @@ class Movie {
             } else if(timeInMilliseconds < 30000) {
                 this.moveCloser(30);
             }
+        }
+
+        if(this.counter < time) {
+            this.counter = time;
         }
 
         this.rootNode.render(this.createSceneGraphContext(this.gl, this.shaderProgram));
