@@ -1,9 +1,13 @@
 p {
   position: relative;
   margin-top: -1.5em;
-  font: bold 2em Verdana;
-  color: #2F4F4F;
+  color: #0f0f0f;
   letter-spacing: 1px;
   text-align: center;
   user-select: none;
+}
+
+p#paragraph {
+  font: bold 2em Verdana;
+  color: #72a8a8;
 }

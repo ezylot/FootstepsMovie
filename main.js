@@ -45,6 +45,7 @@ class Movie {
 
     init(resources) {
         createHtmlText(this.canvas);
+        this.createSubText(this.canvas);
         this.shaderProgram = createProgram(this.gl, resources.defaultVS, resources.defaultFS);
         this.resetCamera();
 
@@ -216,7 +217,6 @@ class Movie {
         let time = Math.floor(timeInMilliseconds / 700);
 
         if(this.counter < time) {
-            console.log("toggle" + this.counter);
             this.rocketNode.toggleLight();
         }
 
@@ -231,7 +231,8 @@ class Movie {
                 this.rootNode = enableLight2Node;
                 this.cameraPosition = vec3.fromValues(1, 2, 20);
                 this.cameraTarget = vec3.fromValues(0, 5, 0);
-                displayText("Scene 1");
+                displayText("Scene 1 - Rocket launch");
+                this.displaySubText("Particles/Smoke - Rocket animation - Skybox - Mirror Window - Moving light - Spot light - Sun light - Texture on rocket / ground - Phong Shader");
             }
 
             var sgrn = this.sceneGraphRootNode;
@@ -264,6 +265,12 @@ class Movie {
 
             if(this.smokeCounter < Math.floor(timeInMilliseconds / 70)) {
                 this.smokeCounter = Math.floor(timeInMilliseconds / 70);
+                let smokeParticle = new AlphaOverrideSGNode(0.28,
+                    new RenderSGNode(
+                        makeSphere(0.4, 20, 20)
+                    )
+                );
+
                 for(let i = 0; i < 8; i++) {
                     let displacementX = Math.random();
                     let displacementY = Math.random();
@@ -281,11 +288,7 @@ class Movie {
 
                     let particle = new TransformationSGNode(
                         mat4.multiply(mat4.create(), this.rocketNode.matrix, glm.translate(displacementX, displacementY * 2, displacementZ)),
-                        new AlphaOverrideSGNode(0.25,
-                            new RenderSGNode(
-                                makeSphere(0.4, 20, 20)
-                            )
-                        )
+                        smokeParticle
                     );
 
                     particle.created = timeInMilliseconds;
@@ -303,7 +306,8 @@ class Movie {
                 enableLight2Node.append(this.sceneGraphRootNode);
                 this.rootNode = enableLight2Node;
                 this.resetCamera();
-                displayText("Scene 2");
+                displayText("Scene 2 - Moving through space");
+                this.displaySubText("Rocket animation - Skybox - Mirror Window - Moving light - Sun light - Texture on rocket - Phong Shader");
 
                 this.rocketNode.setSkyboxTexture(this.universumSkyboxTexture);
 
@@ -333,14 +337,15 @@ class Movie {
                 enableLight2Node.append(this.sceneGraphRootNode);
                 this.rootNode = enableLight2Node;
                 this.resetCamera();
-                displayText("Scene 3");
+                displayText("Scene 3 - Prepare for landing");
+                this.displaySubText("Skybox - Animated camera flight - Sun light - Texture on moon - Phong Shader");
                 this.rocketNode.matrix = mat4.create();
                 this.cameraPosition = vec3.fromValues(0, 5, 90);
             }
 
             if(timeInMilliseconds < 25000) {
-                this.moveCloser(20);
-            } else if(timeInMilliseconds < 30000) {
+                this.moveCloser(22);
+            } else if(timeInMilliseconds < 30500) {
                 this.moveCloser(30);
             }
         }
@@ -424,6 +429,19 @@ class Movie {
             viewVector[1] / length,
             viewVector[2] / length
         ];
+    }
+
+    displaySubText(text) {
+        document.getElementById('subParagraph').innerText = text;
+    }
+
+    createSubText(canvas) {
+        var par = document.createElement('p');
+        par.id = 'subParagraph';
+        par.style.width = canvas.clientWidth + 'px';
+        var text = document.createTextNode('');
+        par.appendChild(text);
+        document.body.appendChild(par);
     }
 }
 

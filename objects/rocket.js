@@ -13,7 +13,7 @@ function createRocketNode(movie, resources, sb) {
         } else {
             lightNode.diffuse = [1, 0, 0, 1];
             lightNode.specular = [1, 0, 0, 1];
-            lightBall.diffuse = [193/255, 38/255, 56/255, 1];
+            lightBall.diffuse = [225/255, 115/255, 126/255, 1];
         }
     };
 
@@ -89,7 +89,7 @@ function createRocketNode(movie, resources, sb) {
     lightNode.specular = [1, 0, 0, 1];
 
     var lightBall = new MaterialSGNode(new RenderSGNode(makeSphere(0.1, 20, 20)));
-    lightBall.diffuse = [193/255, 38/255, 56/255, 1];
+    lightBall.diffuse = [225/255, 115/255, 126/255, 1];
 
     rocketNode.append(
         new TransformationSGNode(tipTransformationMatrix,
